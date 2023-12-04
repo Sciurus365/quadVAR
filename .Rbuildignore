@@ -1,0 +1,7 @@
+^NVAR\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^temp$
+^.*\.temp\.R$
+^.*\.RDS$
