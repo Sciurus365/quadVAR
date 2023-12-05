@@ -7,12 +7,12 @@ make_tidy_data <- function(data, vars, expressions) {
   data_vars <- rlang::as_data_mask(data[, vars])
   env_t <- rlang::new_environment(list(t = NA_integer_), globalenv())
   df <- df %>%
-  dplyr::mutate(value = purrr::map2_dbl(expr_feature, t, function(expr_feature, t) {
-    env_t$t <- t
-    rlang::eval_tidy(expr_feature, data = data_vars, env = env_t)
-  })) %>%
-  tidyr::pivot_wider(id_cols = t, names_from = expr_feature, values_from = value) %>%
-  dplyr::bind_cols(data[training_time[1:(length(training_time))], vars])
+    dplyr::mutate(value = purrr::map2_dbl(expr_feature, t, function(expr_feature, t) {
+      env_t$t <- t
+      rlang::eval_tidy(expr_feature, data = data_vars, env = env_t)
+    })) %>%
+    tidyr::pivot_wider(id_cols = t, names_from = expr_feature, values_from = value) %>%
+    dplyr::bind_cols(data[training_time[1:(length(training_time))], vars])
   return(structure(df, features = features, vars = vars))
 }
 
@@ -20,14 +20,21 @@ make_tidy_data <- function(data, vars, expressions) {
 #' @noRd
 make_I_expressions <- function(vars, p) {
   result <- make_expressions(vars, p)
-  lapply(result, function(x){
+  lapply(result, function(x) {
     rlang::expr(I(!!x))
   })
 }
 
 make_expressions <- function(vars, p) {
   e_linear <- make_e_linear(vars)
-  e_nonlinear <- make_e_nonlinear(e_linear, p)
+  if (p <= 1) {
+    return(c(lapply(e_linear, expression_add_backtick)))
+  }
+
+  e_nonlinear <- c()
+  for (i in 2:p) {
+    e_nonlinear <- c(e_nonlinear, make_e_nonlinear(e_linear, as.numeric(i)))
+  }
   return(c(lapply(e_linear, expression_add_backtick), e_nonlinear))
 }
 

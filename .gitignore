@@ -6,3 +6,4 @@
 \temp
 *.temp.R
 *.RDS
+*.csv

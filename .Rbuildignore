@@ -1,7 +1,8 @@
-^NVAR\.Rproj$
+^NVAR2\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
 ^temp$
 ^.*\.temp\.R$
 ^.*\.RDS$
+^.*\.csv$

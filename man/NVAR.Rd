@@ -4,7 +4,7 @@
 \alias{NVAR}
 \title{Estimate Lag-1 Nested Nonlinear Vector Autoregressive Models}
 \usage{
-NVAR(data, vars, p, ...)
+NVAR(data, vars, p, method = c("dredge", "stepAIC"), ...)
 }
 \arguments{
 \item{data}{A \code{tibble}, data.frame, or matrix that represents a time series of vectors, with each row as a time step.}
@@ -12,6 +12,8 @@ NVAR(data, vars, p, ...)
 \item{vars}{A character vector of the variable names used in the model.}
 
 \item{p}{The maximum order of polynomial feature vector.}
+
+\item{method}{One of "dredge" or "stepAIC". "dredge" uses \code{\link[MuMIn:dredge]{MuMIn::dredge()}} and search for all possible submodels, and "stepAIC" uses \code{\link[MASS:stepAIC]{MASS::stepAIC()}} and perform a backward stepwise selection.}
 
 \item{...}{Parameters passed to \code{\link[MuMIn:dredge]{MuMIn::dredge()}} for model selection.}
 }

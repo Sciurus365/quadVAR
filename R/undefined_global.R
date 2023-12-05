@@ -1,1 +1,1 @@
-utils::globalVariables(c("expr_feature", "value"))
+utils::globalVariables(c("expr_feature", "value", "."))
