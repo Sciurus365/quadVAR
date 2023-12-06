@@ -22,3 +22,13 @@ construct_formula_AR <- function(vars, expressions) {
   }
   return(result)
 }
+
+construct_formula_linear_scope <- function(vars, expressions) {
+  rhs <- expressions %>%
+    lapply(rlang::expr_deparse) %>%
+    c() %>%
+    paste0(collapse = "+") %>%
+    rlang::parse_expr()
+
+  return(rlang::expr(~ !!rhs))
+}

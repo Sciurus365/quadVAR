@@ -1,0 +1,53 @@
+---
+title: '1'
+author: "Jingmeng Cui"
+date: "2023-12-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+data_s1 <- read_csv("data_s1.csv")
+```
+```{r}
+library(devtools)
+load_all()
+model1 <- NVAR(data_s1, vars = colnames(data_s1), p = 2, method = "stepAIC", rank = "BIC")
+print(model1)
+
+model2 <- NVAR(data_s1[1:75,], vars = colnames(data_s1), p = 2, method = "stepAIC", rank = "BIC")
+print(model2)
+
+model3 <- NVAR(data_s1[,1:4], vars = colnames(data_s1)[1:4], p = 2, method = "dredge") # not feasible with all 6 variables
+```
+
+# model importance
+
+```{r}
+vi1 <- vip::vi_firm(model1$best_model[[1]], train = model1$data_tidy)
+vi1
+
+par(mfrow = c(2, 3))
+for (name in vi1$Variable) {
+  plot(attr(vi1, which = "effects")[[name]], type = "l", ylim = c(6, 8), las = 1)
+}
+```
+
+```{r}
+vi2 <- vip::vi_firm(model2$best_model[[1]], train = model1$data_tidy)
+vi2
+
+par(mfrow = c(2, 3))
+for (name in vi2$Variable) {
+  plot(attr(vi2, which = "effects")[[name]], type = "l", ylim = c(6, 8), las = 1)
+}
+```
+Worked in principle. But:
+1. Too many models, AIC under-estimated. -> EBIC?
+2. Best model meaningful or not? unstandardized, not ortho, may contain higher order terms without lower order terms.
+
+“Let the computer find out” is a poor strategy and usually reflects the fact that the researcher did not bother to think clearly about the problem of interest and its scientific setting (Burnham and Anderson, 2002).

@@ -47,20 +47,20 @@ make_e_linear <- function(vars) {
 }
 
 make_e_nonlinear <- function(e_linear, p) {
-  nonlinear_power_vector <- all_vecs(sum = p, length = length(e_linear))
+  nonlinear_power_vector <- all_vecs_sum(sum = p, length = length(e_linear))
   e_nonlinear <- purrr::map(nonlinear_power_vector, make_monomial, e_linear)
   return(e_nonlinear)
 }
 
 #' All vectors with length `length` and sum up to `sum`
 #' @noRd
-all_vecs <- function(sum, length, prev = c()) {
+all_vecs_sum <- function(sum, length, prev = c()) {
   if (length == 1) {
     return(list(c(prev, sum)))
   } else {
     result <- list()
     for (i in sum:0) {
-      result <- c(result, all_vecs(sum - i, length - 1, prev = c(prev, i)))
+      result <- c(result, all_vecs_sum(sum - i, length - 1, prev = c(prev, i)))
     }
     return(result)
   }
