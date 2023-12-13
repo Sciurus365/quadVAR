@@ -16,7 +16,9 @@ Imports:
     MASS,
     MuMIn,
     purrr,
+    RAMP,
     rlang,
+    SIS,
     stats,
     tibble,
     tidyr

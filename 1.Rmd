@@ -16,7 +16,10 @@ data_s1 <- read_csv("data_s1.csv")
 ```{r}
 library(devtools)
 load_all()
-model1 <- NVAR(data_s1, vars = colnames(data_s1), p = 2, method = "stepAIC", rank = "BIC")
+model1 <- NVAR(data_s1, vars = colnames(data_s1), tune = "EBIC")
+# IC: 750 for AR, 145 for VAR, -2200 for NVAR. Not possible. Something wrong. Maybe different calculation.
+# extractAIC for AR yields -2159. Comparable with NVAR.
+
 print(model1)
 
 model2 <- NVAR(data_s1[1:75,], vars = colnames(data_s1), p = 2, method = "stepAIC", rank = "BIC")
@@ -51,3 +54,5 @@ Worked in principle. But:
 2. Best model meaningful or not? unstandardized, not ortho, may contain higher order terms without lower order terms.
 
 “Let the computer find out” is a poor strategy and usually reflects the fact that the researcher did not bother to think clearly about the problem of interest and its scientific setting (Burnham and Anderson, 2002).
+
+# new comparison between regularized AR, VAR, and RAMP
