@@ -5,8 +5,35 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
                            "cox"), penalty = c("SCAD", "MCP", "lasso"), concavity.parameter = switch(penalty,
                                                                                                      SCAD = 3.7, 3), tune = c("cv", "aic", "bic", "ebic"), nfolds = 10,
           type.measure = c("deviance", "class", "auc", "mse", "mae"),
-          gamma.ebic = 1)
+          gamma.ebic = 1, lm_null)
 {
+  ## SIS:::loglik
+  loglik <- function (X, y, beta, family)
+  {
+    K = dim(beta)[2]
+    link = cbind(1, X) %*% beta
+    yrep = repmat(y, 1, K)
+    if (family == "gaussian")
+      return(apply((yrep - link)^2, 2, sum))
+    if (family == "poisson")
+      return(apply(exp(link) - yrep * link, 2, sum))
+    if (family == "binomial")
+      return(apply(log(1 + exp(link)) - yrep * link, 2, sum))
+  }
+  ## SIS:::repmat
+  repmat <- function (X, m, n)
+  {
+    X = as.matrix(X)
+    mx = dim(X)[1]
+    nx = dim(X)[2]
+    matrix(t(matrix(X, mx, nx * n)), mx * m, nx * n, byrow = T)
+  }
+  ## SIS:::getdf
+  getdf <- function (coef.beta)
+  {
+    apply(abs(coef.beta) > 1e-10, 2, sum)
+  }
+
   if (is.null(x) || is.null(y))
     stop("The data is missing!")
   this.call = match.call()
@@ -53,7 +80,7 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
     if (penalty == "lasso") {
       reg.fit = glmnet::glmnet(x, y, family = family)
       coef.beta = rbind(reg.fit$a0, as.matrix(reg.fit$beta))
-      dev = deviance(reg.fit)
+      dev = deviance(reg.fit) - reg.fit$nulldev + n*log(deviance(lm_null)/n)
       reg.df = reg.fit$df
     }
     else {
@@ -98,5 +125,6 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
   ix = which(coef.beta != 0)
   beta = coef.beta[ix]
   return(list(ix = ix, a0 = a0, beta = beta, fit = reg.fit,
-              lambda = lambda, lambda.ind = lambda.ind, ic = ic))
+              lambda = lambda, lambda.ind = lambda.ind, ic = ic,
+              dev = dev, x = x, y = y, coef.beta = coef.beta, family = family))
 }

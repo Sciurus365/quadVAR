@@ -19,6 +19,8 @@ load_all()
 model1 <- NVAR(data_s1, vars = colnames(data_s1), tune = "EBIC")
 # IC: 750 for AR, 145 for VAR, -2200 for NVAR. Not possible. Something wrong. Maybe different calculation.
 # extractAIC for AR yields -2159. Comparable with NVAR.
+# now the question is about VAR/glmnet. also to check other types of penalty.
+# ncvreg can calculate AIC, ~600, in parallel with AIC for AR.
 
 print(model1)
 
@@ -56,3 +58,38 @@ Worked in principle. But:
 “Let the computer find out” is a poor strategy and usually reflects the fact that the researcher did not bother to think clearly about the problem of interest and its scientific setting (Burnham and Anderson, 2002).
 
 # new comparison between regularized AR, VAR, and RAMP
+
+### relationship between AICs in different packages/functions
+
+taken from the example of RAMP::RAMP
+
+
+```{r}
+set.seed(0)
+n = 500
+p = 3 #Can be changed to a much larger number say 50000
+x = matrix(rnorm(n*p),n,p)
+eta = 1 * x[,1] + 2 * x[,2] + 3* x[,3]
+y =  eta + rnorm(n)
+
+temp1 <- RAMP::RAMP(X = x, y = y, penalty = "MCP", tune = "AIC")
+temp1
+with(temp1, cri.list[cri.loc]) + n + n*log(2*pi) + 4
+temp1$df[temp1$cri.loc]
+temp1_ <- RAMP::RAMP(X = x, y = y, penalty = "MCP", tune = "BIC")
+with(temp1_, cri.list[cri.loc]) + n + n*log(2*pi) + 2*log(n)
+
+
+temp2 <- SIS::tune.fit(x = x, y = y, penalty = "MCP", tune = "aic")
+c(temp2$a0, temp2$beta)
+temp2$fit %>% AIC %>% min
+temp2$fit %>% BIC %>% min
+
+temp3 <- lm(y ~ x[,1] + x[,2] + x[,3])
+temp3
+AIC(temp3)
+extractAIC(temp3)[2] + n + n*log(2*pi) + 2
+extractAIC(temp3, k = log(n))[2] + n + n*log(2*pi) + log(n)
+# there is a 2k in the AIC formula. AIC() counts variance and intercept for k, extractAIC() only counts intercept for k, RAMP counts neither variance nor intercept for k.
+```
+

@@ -27,6 +27,11 @@ NVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", ...) {
     lm(data_y %>% dplyr::pull(a_var) ~ 1)
   })
 
+  # Saturated model
+  Saturated_model <- lapply(vars, function(a_var) {
+    lm(data_y %>% dplyr::pull(a_var) ~ data_x %>% as.matrix())
+  })
+
   # AR models
   AR_model <- lapply(vars, function(a_var) {
     # SIS::tune.fit(x = data_x[, a_var, drop = FALSE] %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), ...)
@@ -35,7 +40,8 @@ NVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", ...) {
 
   # VAR models
   VAR_model <- lapply(vars, function(a_var) {
-    tune.fit(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), ...)
+    tune.fit(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), lm_null = Intercept_model[[1]], ...)
+    # [1] is wrong here. just for testing.
   })
   # why don't it return the value, i.e., EBIC?
 
@@ -44,7 +50,7 @@ NVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", ...) {
     RAMP::RAMP(X = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = penalty, tune = tune, ...)
   })
 
-  return(list(Intercept_model = Intercept_model, AR_model = AR_model, VAR_model = VAR_model, NVAR_model = NVAR_model, data = data, vars = vars))
+  return(list(Intercept_model = Intercept_model, Saturated_model = Saturated_model, AR_model = AR_model, VAR_model = VAR_model, NVAR_model = NVAR_model, data = data, vars = vars))
   # summary_all_models <-
 
   # best model
