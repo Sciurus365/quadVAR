@@ -22,43 +22,23 @@ NVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", ...) {
   data_y <- data[-1, ]
   d <- ncol(data)
 
-  # intercept-only models
-  Intercept_model <- lapply(vars, function(a_var) {
-    lm(data_y %>% dplyr::pull(a_var) ~ 1)
-  })
-
-  # Saturated model
-  Saturated_model <- lapply(vars, function(a_var) {
-    lm(data_y %>% dplyr::pull(a_var) ~ data_x %>% as.matrix())
-  })
-
   # AR models
   AR_model <- lapply(vars, function(a_var) {
-    # SIS::tune.fit(x = data_x[, a_var, drop = FALSE] %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), ...)
     lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var, drop = FALSE] %>% as.matrix())
   })
 
   # VAR models
   VAR_model <- lapply(vars, function(a_var) {
-    tune.fit(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), lm_null = Intercept_model[[1]], ...)
-    # [1] is wrong here. just for testing.
+    tune.fit(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), ...)
   })
-  # why don't it return the value, i.e., EBIC?
 
   # NVAR models
   NVAR_model <- lapply(vars, function(a_var) {
     RAMP::RAMP(X = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = penalty, tune = tune, ...)
   })
 
-  return(list(Intercept_model = Intercept_model, Saturated_model = Saturated_model, AR_model = AR_model, VAR_model = VAR_model, NVAR_model = NVAR_model, data = data, vars = vars))
-  # summary_all_models <-
-
-  # best model
-
   return(structure(list(
-    full_model = full_model,
-    best_model = best_model, VAR_model = VAR_model, AR_model = AR_model,
-    data = data, data_tidy = td, vars = vars, p = p, method = method, rank = rank, keep_linear = keep_linear
+    AR_model = AR_model, VAR_model = VAR_model, NVAR_model = NVAR_model, data = data, vars = vars, penalty = penalty, tune = tune, others = list(...)
   ), class = "NVAR"))
 }
 
@@ -69,32 +49,52 @@ print.NVAR <- function(x, ...) {
 
 #' @export
 summary.NVAR <- function(object, ...) {
-  if (object$method == "stepAIC" & object$rank == "BIC") {
-      k <- log(nrow(object$data_tidy))
-  } else {
-    k <- 2
+  if (object$tune == "BIC" | object$tune == "EBIC") {
+      AR_IC <- object$AR_model %>%
+        lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
+        unlist() %>% sum()
+
+      VAR_IC <- object$VAR_model %>%
+        lapply(function(x) x$ic) %>%
+        unlist() %>% sum() ### WARNING!! EBIC not implemented yet. this is BIC. also check EBIC for NVAR
+
+      NVAR_IC <- object$NVAR_model %>%
+        lapply(function(x) {
+          n <- x$y %>% length()
+          x$cri.list[x$cri.loc] + n + n*log(2*pi) + 2*log(n)
+          }) %>%
+        unlist() %>% sum()
+  } else if (object$tune == "AIC") {
+    AR_IC <- object$AR_model %>%
+      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
+      unlist() %>% sum()
+
+    VAR_IC <- object$VAR_model %>%
+      lapply(function(x) x$ic) %>%
+      unlist() %>% sum()
+
+    NVAR_IC <- object$NVAR_model %>%
+      lapply(function(x) {
+        n <- x$y %>% length()
+        x$cri.list[x$cri.loc] + n + n*log(2*pi) + 2*2
+      }) %>%
+      unlist() %>% sum()
   }
-  full_model_AIC <- object$full_model %>%
-    lapply(stats::extractAIC, k = k) %>%
-    do.call(rbind, .) %>%
-    colSums()
-  best_model_AIC <- object$best_model %>%
-    lapply(stats::extractAIC, k = k) %>%
-    do.call(rbind, .) %>%
-    colSums()
-  VAR_AIC <- object$VAR_model %>%
-    lapply(stats::extractAIC, k = k) %>%
-    do.call(rbind, .) %>%
-    colSums()
-  AR_AIC <- object$AR_model %>%
-    lapply(stats::extractAIC, k = k) %>%
-    do.call(rbind, .) %>%
-    colSums()
+
+  AR_df <- object$AR_model %>%
+    lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
+    unlist() %>% sum()
+  VAR_df <- object$VAR_model %>%
+    lapply(function(x) length(x$beta)) %>%
+    unlist() %>% sum()
+  NVAR_df <- object$NVAR_model %>%
+    lapply(function(x) x$df[x$cri.loc]) %>%
+    unlist() %>% sum()
+
   tibble::tribble(
     ~`Model`, ~`Sumdf`, ~`SumIC`,
-    "Full", full_model_AIC[1], full_model_AIC[2],
-    "Best", best_model_AIC[1], best_model_AIC[2],
-    "VAR", VAR_AIC[1], VAR_AIC[2],
-    "AR", AR_AIC[1], AR_AIC[2]
+    "AR", AR_df, AR_IC,
+    "VAR", VAR_df, VAR_IC,
+    "NVAR", NVAR_df, NVAR_IC
   )
 }
