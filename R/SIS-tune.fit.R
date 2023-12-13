@@ -7,6 +7,33 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
           type.measure = c("deviance", "class", "auc", "mse", "mae"),
           gamma.ebic = 1)
 {
+  ## SIS:::loglik
+  loglik <- function (X, y, beta, family)
+  {
+    K = dim(beta)[2]
+    link = cbind(1, X) %*% beta
+    yrep = repmat(y, 1, K)
+    if (family == "gaussian")
+      return(apply((yrep - link)^2, 2, sum))
+    if (family == "poisson")
+      return(apply(exp(link) - yrep * link, 2, sum))
+    if (family == "binomial")
+      return(apply(log(1 + exp(link)) - yrep * link, 2, sum))
+  }
+  ## SIS:::repmat
+  repmat <- function (X, m, n)
+  {
+    X = as.matrix(X)
+    mx = dim(X)[1]
+    nx = dim(X)[2]
+    matrix(t(matrix(X, mx, nx * n)), mx * m, nx * n, byrow = T)
+  }
+  ## SIS:::getdf
+  getdf <- function (coef.beta)
+  {
+    apply(abs(coef.beta) > 1e-10, 2, sum)
+  }
+
   if (is.null(x) || is.null(y))
     stop("The data is missing!")
   this.call = match.call()
@@ -19,15 +46,7 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
     stop("nfolds must be numeric!")
   type.measure = match.arg(type.measure)
   if (tune == "cv") {
-    if (penalty == "lasso") {
-      cv.fit = glmnet::cv.glmnet(x, y, family = family, type.measure = type.measure,
-                         nfolds = nfolds)
-      coef.beta = coef(cv.fit, s = "lambda.1se")
-      reg.fit = cv.fit$glmnet.fit
-      lambda = cv.fit$lambda.1se
-      lambda.ind = which(cv.fit$lambda == cv.fit$lambda.1se)
-    }
-    else if (family != "cox") {
+    if (family != "cox") {
       cv.fit = ncvreg::cv.ncvreg(x, y, family = family, penalty = penalty,
                          gamma = concavity.parameter, nfolds = nfolds)
       cv.1se.ind = min(which(cv.fit$cve < cv.fit$cve[cv.fit$min] +
@@ -50,13 +69,6 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
   }
   else {
     n = nrow(x)
-    if (penalty == "lasso") {
-      reg.fit = glmnet::glmnet(x, y, family = family)
-      coef.beta = rbind(reg.fit$a0, as.matrix(reg.fit$beta))
-      dev = deviance(reg.fit)
-      reg.df = reg.fit$df
-    }
-    else {
       if (family != "cox") {
         reg.fit = ncvreg::ncvreg(x, y, family = family, penalty = penalty,
                          gamma = concavity.parameter)
@@ -70,7 +82,6 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
         coef.beta = reg.fit$beta
         dev = 2 * reg.fit$loss
         reg.df = getdf(coef.beta)
-      }
     }
     if (tune == "aic") {
       obj = dev + 2 * reg.df
@@ -90,8 +101,7 @@ tune.fit <- function (x, y, family = c("gaussian", "binomial", "poisson",
   if (family != "cox") {
     a0 = coef.beta[1]
     coef.beta = coef.beta[-1]
-  }
-  else {
+  } else {
     a0 = NULL
     coef.beta = as.vector(coef.beta)
   }
