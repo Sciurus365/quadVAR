@@ -56,7 +56,7 @@ summary.NVAR <- function(object, ...) {
 
       VAR_IC <- object$VAR_model %>%
         lapply(function(x) x$ic) %>%
-        unlist() %>% sum() ### WARNING!! EBIC not implemented yet. this is BIC. also check EBIC for NVAR
+        unlist() %>% sum()
 
       NVAR_IC <- object$NVAR_model %>%
         lapply(function(x) {
@@ -92,9 +92,9 @@ summary.NVAR <- function(object, ...) {
     unlist() %>% sum()
 
   tibble::tribble(
-    ~`Model`, ~`Sumdf`, ~`SumIC`,
-    "AR", AR_df, AR_IC,
-    "VAR", VAR_df, VAR_IC,
-    "NVAR", NVAR_df, NVAR_IC
+    ~`Model`, ~`Sumdf`, ~`SumIC`, ~`weight`,
+    "AR", AR_df, AR_IC, exp(-(AR_IC - min(AR_IC, VAR_IC, NVAR_IC))/2)/sum(exp(-(c(AR_IC, VAR_IC, NVAR_IC) - min(AR_IC, VAR_IC, NVAR_IC))/2)),
+    "VAR", VAR_df, VAR_IC, exp(-(VAR_IC - min(AR_IC, VAR_IC, NVAR_IC))/2)/sum(exp(-(c(AR_IC, VAR_IC, NVAR_IC) - min(AR_IC, VAR_IC, NVAR_IC))/2)),
+    "NVAR", NVAR_df, NVAR_IC, exp(-(NVAR_IC - min(AR_IC, VAR_IC, NVAR_IC))/2)/sum(exp(-(c(AR_IC, VAR_IC, NVAR_IC) - min(AR_IC, VAR_IC, NVAR_IC))/2))
   )
 }
