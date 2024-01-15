@@ -24,7 +24,7 @@ NVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", ...) {
 
   # AR models
   AR_model <- lapply(vars, function(a_var) {
-    lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var, drop = FALSE] %>% as.matrix())
+    lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var] %>% as.matrix())
   })
 
   # VAR models
@@ -32,19 +32,29 @@ NVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", ...) {
     tune.fit(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune), ...)
   })
 
+  # full VAR models
+  VAR_model_full <- lapply(vars, function(a_var) {
+    lm(data_y %>% dplyr::pull(a_var) ~ ., data = data_x)
+  })
+
   # NVAR models
   NVAR_model <- lapply(vars, function(a_var) {
     RAMP::RAMP(X = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = penalty, tune = tune, ...)
   })
 
+  # full NVAR models
+  NVAR_model_full <- lapply(vars, function(a_var) {
+    lm(as.formula(paste("data_y %>% dplyr::pull(a_var) ~ ", paste('poly(', paste(colnames(data_x), collapse = ","), ', degree = 2, raw = TRUE)', sep=''), collapse=" + ")), data = data_x)
+  })
+
   return(structure(list(
-    AR_model = AR_model, VAR_model = VAR_model, NVAR_model = NVAR_model, data = data, vars = vars, penalty = penalty, tune = tune, others = list(...)
+    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, NVAR_model = NVAR_model, NVAR_model_full = NVAR_model_full, data = data, vars = vars, penalty = penalty, tune = tune, others = list(...)
   ), class = "NVAR"))
 }
 
 #' @export
 print.NVAR <- function(x, ...) {
-  summary.NVAR(x, ...)
+  print(summary.NVAR(x, ...))
 }
 
 #' @export
@@ -58,11 +68,19 @@ summary.NVAR <- function(object, ...) {
         lapply(function(x) x$ic) %>%
         unlist() %>% sum()
 
+      VAR_full_IC <- object$VAR_model_full %>%
+        lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
+        unlist() %>% sum()
+
       NVAR_IC <- object$NVAR_model %>%
         lapply(function(x) {
           n <- x$y %>% length()
           x$cri.list[x$cri.loc] + n + n*log(2*pi) + 2*log(n)
           }) %>%
+        unlist() %>% sum()
+
+      NVAR_full_IC <- object$NVAR_model_full %>%
+        lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
         unlist() %>% sum()
   } else if (object$tune == "AIC") {
     AR_IC <- object$AR_model %>%
@@ -73,11 +91,19 @@ summary.NVAR <- function(object, ...) {
       lapply(function(x) x$ic) %>%
       unlist() %>% sum()
 
+    VAR_full_IC <- object$VAR_model_full %>%
+      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
+      unlist() %>% sum()
+
     NVAR_IC <- object$NVAR_model %>%
       lapply(function(x) {
         n <- x$y %>% length()
         x$cri.list[x$cri.loc] + n + n*log(2*pi) + 2*2
       }) %>%
+      unlist() %>% sum()
+
+    NVAR_full_IC <- object$NVAR_model_full %>%
+      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
       unlist() %>% sum()
   }
 
@@ -87,14 +113,27 @@ summary.NVAR <- function(object, ...) {
   VAR_df <- object$VAR_model %>%
     lapply(function(x) length(x$beta)) %>%
     unlist() %>% sum()
+  VAR_full_df <- object$VAR_model_full %>%
+    lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
+    unlist() %>% sum()
   NVAR_df <- object$NVAR_model %>%
     lapply(function(x) x$df[x$cri.loc]) %>%
     unlist() %>% sum()
+  NVAR_full_df <- object$NVAR_model_full %>%
+    lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
+    unlist() %>% sum()
 
-  tibble::tribble(
-    ~`Model`, ~`Sumdf`, ~`SumIC`, ~`weight`,
-    "AR", AR_df, AR_IC, exp(-(AR_IC - min(AR_IC, VAR_IC, NVAR_IC))/2)/sum(exp(-(c(AR_IC, VAR_IC, NVAR_IC) - min(AR_IC, VAR_IC, NVAR_IC))/2)),
-    "VAR", VAR_df, VAR_IC, exp(-(VAR_IC - min(AR_IC, VAR_IC, NVAR_IC))/2)/sum(exp(-(c(AR_IC, VAR_IC, NVAR_IC) - min(AR_IC, VAR_IC, NVAR_IC))/2)),
-    "NVAR", NVAR_df, NVAR_IC, exp(-(NVAR_IC - min(AR_IC, VAR_IC, NVAR_IC))/2)/sum(exp(-(c(AR_IC, VAR_IC, NVAR_IC) - min(AR_IC, VAR_IC, NVAR_IC))/2))
+  output <- tibble::tribble(
+    ~`Model`, ~`Sumdf`, ~`SumIC`,
+    "AR", AR_df, AR_IC,
+    "VAR", VAR_df, VAR_IC,
+    "VAR_full", VAR_full_df, VAR_full_IC,
+    "NVAR", NVAR_df, NVAR_IC,
+    "NVAR_full", NVAR_full_df, NVAR_full_IC
   )
+
+  minIC <- output$SumIC %>% min()
+  output$DiffIC <- output$SumIC - minIC
+  output$Weight <- exp(-output$DiffIC/2)/sum(exp(-output$DiffIC/2))
+  return(output)
 }
