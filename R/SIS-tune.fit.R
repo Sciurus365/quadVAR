@@ -1,9 +1,30 @@
-#' @inherit SIS::tune.fit
-#' This function is modified from \code{\link{SIS::tune.fit}}. It is used to tune the regularization parameter for the regularized VAR models. This wrapper is used because of the following reasons.
-#' 1. The original \code{\link{SIS::tune.fit}} function does not return the value of the information criteria that we would like to use.
+#' Using the **glmnet** and **ncvreg** packages, fits a Generalized Linear Model or Cox Proportional Hazards Model using various methods for choosing the regularization parameter λ
+#'
+#' This function is modified from [SIS::tune.fit()]. It is used to tune the regularization parameter for the regularized VAR models. This wrapper is used because of the following reasons.
+#' 1. The original [SIS::tune.fit()] function does not return the value of the information criteria that we would like to use.
 #' 2. We use the ncvreg package exclusively (so we removed the code using the glmnet package). This is to make the result more consistent, and also because the ncvreg package has better support for the calculation of information criteria.
 #' 3. We also removed the generalized linear model (GLM) option, and the cross-validation option because we do not use them.
 #' 4. We use stats::AIC() and stats::BIC() instead of the ones using SIS:::loglik() to make the calculation methods more consistent.
+#'
+#' Original description from [SIS::tune.fit()]:
+#'
+#' This function fits a generalized linear model or a Cox proportional hazards model via penalized maximum likelihood, with available penalties as indicated in the **glmnet** and **ncvreg** packages. Instead of providing the whole regularization solution path, the function returns the solution at a unique value of λ, the one optimizing the criterion specified in tune.
+#' @examples
+#' \dontrun{
+#' set.seed(0)
+#' data('leukemia.train', package = 'SIS')
+#' y.train = leukemia.train[,dim(leukemia.train)[2]]
+#' x.train = as.matrix(leukemia.train[,-dim(leukemia.train)[2]])
+#' x.train = standardize(x.train)
+#' model = tune.fit(x.train[,1:3500], y.train, family='binomial', tune='bic')
+#' model$ix
+#' model$a0
+#' model$beta
+#' }
+#'
+#'
+#'
+#' @inherit SIS::tune.fit
 tune.fit <- function(x, y, family = "gaussian", penalty = c("SCAD", "MCP", "lasso"), concavity.parameter = switch(penalty,
                        SCAD = 3.7,
                        3
@@ -21,7 +42,7 @@ tune.fit <- function(x, y, family = "gaussian", penalty = c("SCAD", "MCP", "lass
   }
   this.call <- match.call()
   penalty <- match.arg(penalty)
-  if (class(concavity.parameter) != "numeric") {
+  if (!is.numeric(concavity.parameter)) {
     stop("concavity.parameter must be numeric!")
   }
   tune <- match.arg(tune)
