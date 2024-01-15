@@ -17,7 +17,8 @@ Imports:
     RAMP,
     rlang,
     stats,
-    tibble
+    tibble,
+    tidyr
 Suggests: 
     nonlinearTseries,
     SIS

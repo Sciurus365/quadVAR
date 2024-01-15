@@ -2,8 +2,10 @@
 % Please edit documentation in R/quadVAR.R
 \name{quadVAR}
 \alias{quadVAR}
+\alias{print.quadVAR}
 \alias{summary.quadVAR}
-\title{Estimate Lag-1 Quadratic Vector Autoregression Models}
+\alias{coef.quadVAR}
+\title{Estimate lag-1 quadratic vector autoregression models}
 \usage{
 quadVAR(
   data,
@@ -14,7 +16,11 @@ quadVAR(
   RAMP_options = list()
 )
 
+\method{print}{quadVAR}(x, ...)
+
 \method{summary}{quadVAR}(object, ...)
+
+\method{coef}{quadVAR}(object, silent = FALSE, ...)
 }
 \arguments{
 \item{data}{A \code{tibble}, data.frame, or matrix that represents a time series of vectors, with each row as a time step.}
@@ -29,9 +35,11 @@ quadVAR(
 
 \item{RAMP_options}{A list of other parameters for the \code{\link[RAMP:RAMP]{RAMP::RAMP()}} function. This is used for the nonlinear quadratic VAR model.}
 
-\item{object}{An \code{quadVAR} object.}
-
 \item{...}{Not in use.}
+
+\item{object, x}{An \code{quadVAR} object.}
+
+\item{silent}{Whether to print out the results.}
 }
 \value{
 An \code{quadVAR} object that contains the following elements:
@@ -49,6 +57,20 @@ This function estimate regularized nonlinear quadratic vector autoregression mod
 }
 \section{Methods (by generic)}{
 \itemize{
+\item \code{print(quadVAR)}: Print the summary for a quadVAR object. See \code{\link[=summary.quadVAR]{summary.quadVAR()}} for details. Note that this function does not automatically print all the coefficients. Use \code{\link[=coef.quadVAR]{coef.quadVAR()}} to extract the coefficients.
+
 \item \code{summary(quadVAR)}: Summary of a quadVAR object. Different IC definitions used by different packages (which differ by a constant) are unified to make them comparable to each other.
 
+\item \code{coef(quadVAR)}: Extract the coefficients from a quadVAR object.
+
 }}
+\examples{
+set.seed(1614)
+data <- sim_4_emo(time = 200, sd = 1)
+plot(data[,"x1"])
+qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"), penalty = "LASSO", tune = "EBIC")
+summary(qV1)
+coef(qV1)
+
+
+}

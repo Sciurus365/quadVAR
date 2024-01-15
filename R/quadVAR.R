@@ -1,4 +1,4 @@
-#' Estimate Lag-1 Quadratic Vector Autoregression Models
+#' Estimate lag-1 quadratic vector autoregression models
 #'
 #' This function estimate regularized nonlinear quadratic vector autoregression models with strong hierarchy using the [RAMP::RAMP()] algorithm, and also compare it with the linear AR, regularized VAR, and unregularized (full) VAR and quadratic VAR models.
 #'
@@ -8,7 +8,8 @@
 #' @param tune Tuning parameter selection method. Possible options include "AIC", "BIC", "EBIC", with "EBIC" as the default.
 #' @param SIS_options A list of other parameters for the [SIS::tune.fit()] function. This is used for the regularized  VAR models.
 #' @param RAMP_options A list of other parameters for the [RAMP::RAMP()] function. This is used for the nonlinear quadratic VAR model.
-#' @param object An `quadVAR` object.
+#' @param object,x An `quadVAR` object.
+#' @param silent Whether to print out the results.
 #' @param ... Not in use.
 #'
 #' @return An `quadVAR` object that contains the following elements:
@@ -20,6 +21,14 @@
 #'  \item `fullquadVAR`: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
 #'  \item `data`,`vars`,`penalty`,`tune`,`SIS_options`,`RAMP_options`: The input arguments.
 #'  }
+#'
+#' @examples
+#' set.seed(1614)
+#' data <- sim_4_emo(time = 200, sd = 1)
+#' plot(data[,"x1"])
+#' qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"), penalty = "LASSO", tune = "EBIC")
+#' summary(qV1)
+#' coef(qV1)
 #'
 #'
 #' @export
@@ -62,6 +71,7 @@ quadVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", SIS_options = 
     AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options), class = "quadVAR"))
 }
 
+#' @describeIn quadVAR Print the summary for a quadVAR object. See [summary.quadVAR()] for details. Note that this function does not automatically print all the coefficients. Use [coef.quadVAR()] to extract the coefficients.
 #' @export
 print.quadVAR <- function(x, ...) {
   print(summary.quadVAR(x, ...))
@@ -146,5 +156,46 @@ summary.quadVAR <- function(object, ...) {
   minIC <- output$SumIC %>% min()
   output$DiffIC <- output$SumIC - minIC
   output$Weight <- exp(-output$DiffIC/2)/sum(exp(-output$DiffIC/2))
+  return(output)
+}
+
+#' @describeIn quadVAR Extract the coefficients from a quadVAR object.
+#' @export
+coef.quadVAR <- function(object, silent = FALSE,  ...) {
+  n_var <- object$data %>% ncol()
+
+  output <- data.frame(
+    model = rep(1:n_var, each = 2*n_var + choose(n_var, 2)),
+    effect = rep(generate_effect_term(n_var), n_var),
+    estimate = 0,
+    true = 0
+  )
+
+  for (i in 1:n_var) {
+    # first fill in the main effects
+    output$estimate[output$model == i & output$effect %in% paste0("X", object$quadVAR_model[[i]]$mainInd)] <- object$quadVAR_model[[i]]$beta.m
+    # then fill in the interaction effects
+    for (j in 1:length(object$quadVAR_model[[i]]$interInd)) {
+      output$estimate[output$model == i & output$effect == object$quadVAR_model[[i]]$interInd[j]] <- object$quadVAR_model[[i]]$beta.i[j]
+    }
+  }
+
+  output_toprint <- output
+  output_toprint$estimate <- round(output_toprint$estimate, 2)
+  output_toprint$true <- round(output_toprint$true, 2)
+
+  if(!silent) print(output_toprint)
+
+  invisible(output)
+}
+
+generate_effect_term <- function(n_var) {
+  output_linear <- paste0("X", 1:n_var)
+  output_quad <- tidyr::crossing(Var1 = 1:n_var, Var2 = 1:n_var) %>%
+    dplyr::filter(Var1 <= Var2) %>%
+    apply(c(1,2), function(x) paste0("X", x)) %>%
+    apply(1, function(x) paste0(x, collapse = "")) %>%
+    as.character()
+  output <- c(output_linear, output_quad)
   return(output)
 }
