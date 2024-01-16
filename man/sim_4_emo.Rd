@@ -22,3 +22,6 @@ This function simulates a 4-emotion model which is nonlinear, bistable, discrete
 \references{
 van de Leemput, I. A., Wichers, M., Cramer, A. O., Borsboom, D., Tuerlinckx, F., Kuppens, P., ... & Scheffer, M. (2014). Critical slowing down as early warning for the onset and termination of depression. Proceedings of the National Academy of Sciences, 111(1), 87-92.
 }
+\seealso{
+\code{\link[=true_model_4_emo]{true_model_4_emo()}}, \code{\link[=compare_4_emo]{compare_4_emo()}}, \code{\link[=quadVAR]{quadVAR()}}
+}

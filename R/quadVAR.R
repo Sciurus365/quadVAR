@@ -26,12 +26,16 @@
 #' set.seed(1614)
 #' data <- sim_4_emo(time = 200, sd = 1)
 #' plot(data[,"x1"])
-#' qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"), penalty = "LASSO", tune = "EBIC")
+#' qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"))
 #' summary(qV1)
 #' coef(qV1)
-#'
+#' plot(qV1)
+#' # Compare the estimation with the true model
+#' plot(true_model_4_emo())
+#' plot(qV1, value = 0, value_standardized = FALSE, layout = plot(true_model_4_emo())$layout)
 #'
 #' @export
+#' @seealso [linear_quadVAR_network()]
 quadVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", SIS_options = list(), RAMP_options = list()) {
   # check arguments
   penalty <- toupper(penalty)
@@ -167,8 +171,7 @@ coef.quadVAR <- function(object, silent = FALSE,  ...) {
   output <- data.frame(
     model = rep(1:n_var, each = 2*n_var + choose(n_var, 2)),
     effect = rep(generate_effect_term(n_var), n_var),
-    estimate = 0,
-    true = 0
+    estimate = 0
   )
 
   for (i in 1:n_var) {
@@ -182,7 +185,6 @@ coef.quadVAR <- function(object, silent = FALSE,  ...) {
 
   output_toprint <- output
   output_toprint$estimate <- round(output_toprint$estimate, 2)
-  output_toprint$true <- round(output_toprint$true, 2)
 
   if(!silent) print(output_toprint)
 
@@ -198,4 +200,16 @@ generate_effect_term <- function(n_var) {
     as.character()
   output <- c(output_linear, output_quad)
   return(output)
+}
+
+#' @describeIn quadVAR Produce a plot for the linearized quadVAR model. Equivalent to first produce a linear quadVAR network using [linear_quadVAR_network()], then use [plot.linear_quadVAR_network()].
+#' @export
+#' @inheritParams linear_quadVAR_network
+plot.quadVAR <- function(x, value, value_standardized = TRUE, interactive = FALSE, ...) {
+  if(rlang::is_missing(value)) {
+    cli::cli_inform(c("i" = "The {.pkg quadVAR} model, being {.strong nonlinear}, generates a network {.strong meaningful only for specific variable values}. If values are unspecified, the plot defaults to the mean, but this may not be meaningful in all cases."), .frequency = "regularly", .frequency_id = "plot.quadVAR")
+    value <- 0
+  }
+  linear_result <- linear_quadVAR_network(x, value = value, value_standardized = value_standardized)
+  plot(linear_result, interactive = interactive, ...)
 }

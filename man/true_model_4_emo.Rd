@@ -2,16 +2,49 @@
 % Please edit documentation in R/sim_models.R
 \name{true_model_4_emo}
 \alias{true_model_4_emo}
+\alias{coef.true_model_4_emo}
+\alias{print.true_model_4_emo}
 \title{True model for 4-emotion model}
 \usage{
-true_model_4_emo(which)
+true_model_4_emo(...)
+
+\method{coef}{true_model_4_emo}(object, silent = FALSE, ...)
+
+\method{print}{true_model_4_emo}(x, which = NULL, ...)
 }
 \arguments{
+\item{...}{Not in use.}
+
+\item{object}{A true_model_4_emo object.}
+
+\item{silent}{Whether to print out the results.}
+
+\item{x}{A true_model_4_emo object.}
+
 \item{which}{Which model to print out. There are four models in total, corresponding to the four variables.}
 }
 \value{
+A true_model_4_emo object.
+
 NULL, but prints out the true model.
 }
 \description{
-This function prints out the true model for the 4-emotion model in the same format as \code{\link[RAMP:RAMP]{RAMP::RAMP()}}, to help users to compare the true model and the estimated model.
+This function generate the true model for the 4-emotion model. It can used to compare the estimated model with the true model, or to plot the true model.
+}
+\section{Methods (by generic)}{
+\itemize{
+\item \code{coef(true_model_4_emo)}: This function returns the coefficients for the 4-emotion model. It is also used in other functions to generate the linearized version of the true model and to make plots. It returns a list of coefficients for the 4-emotion model, in the same format as \code{\link[=coef.quadVAR]{coef.quadVAR()}}
+
+\item \code{print(true_model_4_emo)}: This function prints out the true model for the 4-emotion model in the same format as \code{\link[RAMP:RAMP]{RAMP::RAMP()}}, to help users to compare the true model and the estimated model.
+
+}}
+\examples{
+coef(true_model_4_emo())
+plot(true_model_4_emo())
+\dontrun{
+plot(true_model_4_emo(), interactive = TRUE)
+}
+}
+\seealso{
+\code{\link[=true_model_4_emo]{true_model_4_emo()}}, \code{\link[=compare_4_emo]{compare_4_emo()}}, \code{\link[=quadVAR]{quadVAR()}}
 }

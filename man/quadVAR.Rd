@@ -5,6 +5,7 @@
 \alias{print.quadVAR}
 \alias{summary.quadVAR}
 \alias{coef.quadVAR}
+\alias{plot.quadVAR}
 \title{Estimate lag-1 quadratic vector autoregression models}
 \usage{
 quadVAR(
@@ -21,6 +22,8 @@ quadVAR(
 \method{summary}{quadVAR}(object, ...)
 
 \method{coef}{quadVAR}(object, silent = FALSE, ...)
+
+\method{plot}{quadVAR}(x, value, value_standardized = TRUE, interactive = FALSE, ...)
 }
 \arguments{
 \item{data}{A \code{tibble}, data.frame, or matrix that represents a time series of vectors, with each row as a time step.}
@@ -40,6 +43,12 @@ quadVAR(
 \item{object, x}{An \code{quadVAR} object.}
 
 \item{silent}{Whether to print out the results.}
+
+\item{value}{A numeric vector of length 1 or the same as the number of nodes, that specifies the values of the variables that the linearized model will be based on. If the length is 1, the same value will be used for all variables.}
+
+\item{value_standardized}{A logical value that specifies whether the input value is standardized or not. If TRUE, the input value will be regarded as standardized value, i.e., mean + ? * sd (e.g., 0 is the mean, 1 is mean + sd, ...). If FALSE, the input value will regarded as in the raw scale of the input data.}
+
+\item{interactive}{Whether to produce an interactive plot using \code{shiny} (in which the user can change the values of variables interactively) or a static plot using \code{\link[qgraph:qgraph]{qgraph::qgraph()}}. Default is \code{FALSE}.}
 }
 \value{
 An \code{quadVAR} object that contains the following elements:
@@ -63,14 +72,22 @@ This function estimate regularized nonlinear quadratic vector autoregression mod
 
 \item \code{coef(quadVAR)}: Extract the coefficients from a quadVAR object.
 
+\item \code{plot(quadVAR)}: Produce a plot for the linearized quadVAR model. Equivalent to first produce a linear quadVAR network using \code{\link[=linear_quadVAR_network]{linear_quadVAR_network()}}, then use \code{\link[=plot.linear_quadVAR_network]{plot.linear_quadVAR_network()}}.
+
 }}
 \examples{
 set.seed(1614)
 data <- sim_4_emo(time = 200, sd = 1)
 plot(data[,"x1"])
-qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"), penalty = "LASSO", tune = "EBIC")
+qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"))
 summary(qV1)
 coef(qV1)
+plot(qV1)
+# Compare the estimation with the true model
+plot(true_model_4_emo())
+plot(qV1, value = 0, value_standardized = FALSE, layout = plot(true_model_4_emo())$layout)
 
-
+}
+\seealso{
+\code{\link[=linear_quadVAR_network]{linear_quadVAR_network()}}
 }

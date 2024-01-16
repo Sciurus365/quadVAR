@@ -7,6 +7,8 @@
 #' @param sd The standard deviation of the noise.
 #'
 #' @return A matrix with the simulated data.
+#'
+#' @seealso [true_model_4_emo()], [compare_4_emo()], [quadVAR()]
 #' @export
 sim_4_emo <-  function(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 0.2){
   output <- matrix(nrow = time, ncol = 5)
@@ -30,35 +32,97 @@ sim_4_emo <-  function(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 0.2){
 
 #' True model for 4-emotion model
 #'
-#' This function prints out the true model for the 4-emotion model in the same format as [RAMP::RAMP()], to help users to compare the true model and the estimated model.
+#' This function generate the true model for the 4-emotion model. It can used to compare the estimated model with the true model, or to plot the true model.
+#' @param ... Parameters passed to [sim_4_emo()]. See [sim_4_emo()] for details.
 #'
+#' @return A true_model_4_emo object.
+#' @export
+#'
+#' @examples
+#' coef(true_model_4_emo())
+#' plot(true_model_4_emo())
+#' \dontrun{
+#' plot(true_model_4_emo(), interactive = TRUE)
+#' }
+true_model_4_emo <- function(...) {
+  return(structure(list(data = data.frame(x1 = c(-1, 0, 1), x2 = c(-1, 0, 1), x3 = c(-1, 0, 1), x4 = c(-1, 0, 1))), class = c("true_model_4_emo", "quadVAR")))
+}
+
+#' @describeIn true_model_4_emo This function returns the coefficients for the 4-emotion model. It is also used in other functions to generate the linearized version of the true model and to make plots. It returns a list of coefficients for the 4-emotion model, in the same format as [coef.quadVAR()]
+#'
+#' @param object A true_model_4_emo object.
+#' @inheritParams coef.quadVAR
+#' @param ... Not in use.
+#' @export
+#' @seealso [true_model_4_emo()], [compare_4_emo()], [quadVAR()]
+coef.true_model_4_emo <- function(object, silent = FALSE, ...) {
+  output <- data.frame(
+    model = rep(1:4, each = 14),
+    effect = rep(c("X1", "X2", "X3", "X4", "X1X1", "X1X2", "X1X3", "X1X4", "X2X2", "X2X3", "X2X4", "X3X3", "X3X4", "X4X4"), 4),
+    estimate = rep(0, 56)
+  )
+  # then fill in the estimates
+  for (i in 1:4) {
+    # then fill in the true effects
+    if (i == 1) {
+      output$estimate[output$model == i & output$effect %in% c("X1", "X2", "X3", "X4")] <- c(0.36, 0.06, -0.3, -0.3)
+      output$estimate[output$model == i & output$effect %in% c("X1X1", "X1X2", "X1X3", "X1X4")] <- c(-0.1, 0.02, -0.1, -0.1)
+    } else if (i == 2) {
+      output$estimate[output$model == i & output$effect %in% c("X1", "X2", "X3", "X4")] <- c(0.06, 0.36, -0.3, -0.3)
+      output$estimate[output$model == i & output$effect %in% c("X1X2", "X2X2", "X2X3", "X2X4")] <- c(0.02, -0.1, -0.1, -0.1)
+    } else if (i == 3) {
+      output$estimate[output$model == i & output$effect %in% c("X1", "X2", "X3", "X4")] <- c(-0.3, -0.3, 0.36, 0.06)
+      output$estimate[output$model == i & output$effect %in% c("X1X3", "X2X3", "X3X3", "X3X4")] <- c(-0.1, -0.1, -0.1, 0.02)
+    } else if (i == 4) {
+      output$estimate[output$model == i & output$effect %in% c("X1", "X2", "X3", "X4")] <- c(-0.3, -0.3, 0.06, 0.36)
+      output$estimate[output$model == i & output$effect %in% c("X1X4", "X2X4", "X3X4", "X4X4")] <- c(-0.1, -0.1, 0.02, -0.1)
+    }
+  }
+  # print the output with the precision of 0.01
+
+  output_toprint <- output
+  output_toprint$estimate <- round(output_toprint$estimate, 2)
+
+  if(!silent) print(output_toprint)
+
+  invisible(output)
+}
+
+#' @describeIn true_model_4_emo This function prints out the true model for the 4-emotion model in the same format as [RAMP::RAMP()], to help users to compare the true model and the estimated model.
 #' @param which Which model to print out. There are four models in total, corresponding to the four variables.
+#' @param x A true_model_4_emo object.
 #' @return NULL, but prints out the true model.
 #' @export
-true_model_4_emo <- function(which) {
-  if (which == 1) {
+print.true_model_4_emo <- function(x, which = NULL, ...) {
+  if (is.null(which)) {
+    for(i in 1:4) {
+      cat("[[", i, "]]\n", sep = "")
+      print(x, which = i)
+    }
+  }
+  else if (which == 1) {
     cat("True main effects: 1 2 3 4\n")
     cat("Coefficients for main effects: 0.36, 0.06, -0.3, -0.3\n")
     cat("True Interaction effects: X1X1 X1X2 X1X3 X1X4\n")
-    cat("Coefficients for interaction effects: -0.1, 0.02, -0.1, -0.1")
+    cat("Coefficients for interaction effects: -0.1, 0.02, -0.1, -0.1\n")
   } else if (which == 2) {
     cat("True main effects: 1 2 3 4\n")
     cat("Coefficients for main effects: 0.06, 0.36, -0.3, -0.3\n")
     cat("True Interaction effects: X1X2 X2X2 X2X3 X2X4\n")
-    cat("Coefficients for interaction effects: 0.02, -0.1, -0.1, -0.1")
+    cat("Coefficients for interaction effects: 0.02, -0.1, -0.1, -0.1\n")
   } else if (which == 3) {
     cat("True main effects: 1 2 3 4\n")
     cat("Coefficients for main effects: -0.3, -0.3, 0.36, 0.06\n")
     cat("True Interaction effects: X1X3 X2X3 X3X3 X3X4\n")
-    cat("Coefficients for interaction effects: -0.1, -0.1, -0.1, 0.02")
+    cat("Coefficients for interaction effects: -0.1, -0.1, -0.1, 0.02\n")
   } else if (which == 4) {
     cat("True main effects: 1 2 3 4\n")
     cat("Coefficients for main effects: -0.3, -0.3, 0.06, 0.36\n")
     cat("True Interaction effects: X1X4 X2X4 X3X4 X4X4\n")
-    cat("Coefficients for interaction effects: -0.1, -0.1, 0.02, -0.1")
+    cat("Coefficients for interaction effects: -0.1, -0.1, 0.02, -0.1\n")
   }
 
-  return(NULL)
+  invisible(NULL)
 }
 
 #' Compare estimated model with true model for 4-emotion model
@@ -112,3 +176,4 @@ compare_4_emo <- function(model, silent = FALSE) {
 
   invisible(output)
 }
+
