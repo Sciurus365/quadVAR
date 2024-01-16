@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 Estimate quadratic vector autoregression models with the
     strong hierarchy using the RAMP algorithm, compare the performance
-    with linear models, and construct networks with partial derivations.
+    with linear models, and construct networks with partial derivatives.
 
 ## Installation
 

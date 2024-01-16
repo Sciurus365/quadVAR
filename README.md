@@ -11,7 +11,7 @@ status](https://www.r-pkg.org/badges/version/quadVAR)](https://CRAN.R-project.or
 
 Estimate quadratic vector autoregression models with the strong
 hierarchy using the RAMP algorithm, compare the performance with linear
-models, and construct networks with partial derivations.
+models, and construct networks with partial derivatives.
 
 ## Installation
 
