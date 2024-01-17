@@ -90,6 +90,7 @@ quadVAR_to_dyn_eqns <- function(model, minus_self = TRUE) {
     df_terms <- model_summary_j %>% tidyr::unite("term", estimate, effect, sep = "*")
     eqs[[j]] <- paste0(df_terms$term, collapse = " + ")
     if(minus_self) eqs[[j]] <- paste0(eqs[[j]], " - X", j)
+    if(eqs[[j]] == "") eqs[[j]] <- "0"
   }
 
   return(eqs)
