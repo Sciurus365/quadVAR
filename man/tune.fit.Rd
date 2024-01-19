@@ -12,7 +12,8 @@ tune.fit(
   concavity.parameter = switch(penalty, SCAD = 3.7, 3),
   tune = c("aic", "bic", "ebic"),
   type.measure = c("deviance", "class", "auc", "mse", "mae"),
-  gamma.ebic = 1
+  gamma.ebic = 1,
+  ...
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ they measure the deviation from the fitted mean to the response. For
 \item{gamma.ebic}{Specifies the parameter in the Extended BIC criterion
 penalizing the size of the corresponding model space. The default is
 \code{gamma.ebic=1}. See references at the end for details.}
+
+\item{...}{additional arguments to be passed to the ncvreg::ncvreg() function.}
 }
 \value{
 Returns an object with \item{ix}{ The vector of indices of the
@@ -73,6 +76,7 @@ This function is modified from \code{\link[SIS:tune.fit]{SIS::tune.fit()}}. It i
 \item We use the ncvreg package exclusively (so we removed the code using the glmnet package). This is to make the result more consistent, and also because the ncvreg package has better support for the calculation of information criteria.
 \item We also removed the generalized linear model (GLM) option, and the cross-validation option because we do not use them.
 \item We use stats::AIC() and stats::BIC() instead of the ones using SIS:::loglik() to make the calculation methods more consistent.
+\item We added \code{...} to allow the user to pass additional arguments to the ncvreg::ncvreg() function.
 }
 }
 \details{

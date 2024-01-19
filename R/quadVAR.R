@@ -4,6 +4,8 @@
 #'
 #' @param data A `tibble`, data.frame, or matrix that represents a time series of vectors, with each row as a time step.
 #' @param vars A character vector of the variable names used in the model.
+#' @inheritParams mlVAR::mlVAR
+#' @param donotestimate A character vector of the model names that are not estimated. Possible options include "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a `quadVAR` model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.
 #' @param penalty The penalty used for the linear and regularized VAR models. Possible options include "LASSO", "SCAD", "MCP", with "LASSO" as the default.
 #' @param tune Tuning parameter selection method. Possible options include "AIC", "BIC", "EBIC", with "EBIC" as the default.
 #' @param SIS_options A list of other parameters for the [SIS::tune.fit()] function. This is used for the regularized  VAR models.
@@ -36,30 +38,61 @@
 #'
 #' @export
 #' @seealso [linear_quadVAR_network()]
-quadVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", SIS_options = list(), RAMP_options = list()) {
+quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO", tune = "EBIC", donotestimate = NULL, SIS_options = list(), RAMP_options = list()) {
   # check arguments
   penalty <- toupper(penalty)
   tune <- toupper(tune)
 
-  data <- tibble::as_tibble(data[, vars, drop = FALSE])
-  data_x <- data[-nrow(data), ]
-  data_y <- data[-1, ]
+  data <- tibble::as_tibble(data[, c(vars, dayvar, beepvar), drop = FALSE])
+  if(any(is.na(data))) {
+    data <- stats::na.omit(data)
+    cli::cli_warn("Missing values detected in either `vars`, `dayvar`, or `beepvar`. {.pkg quadVAR} does not support data imputation at the moment. Thus, all the time points with missing values have been removed.")
+  }
+
+  # remove data points according to the dayvar and beepvar
+  index <- find_index(data, dayvar, beepvar)
+
+  data_x <- data[index[[1]], vars]
+  data_y <- data[index[[2]], vars]
   d <- ncol(data)
 
+  # check if donotestimate only contains valid options
+  if(!is.null(donotestimate)) {
+    upper_donotestimate <- toupper(donotestimate)
+    if(any(!(upper_donotestimate %in% c("AR", "VAR", "VAR_FULL", "QUADVAR_FULL", "ALL_OTHERS")))) {
+      cli::cli_abort(c("Invalid options in donotestimate.", i = "Possible options include: AR, VAR, VAR_full, quadVAR_full, all_others (case insensitive).", "x" = "You've supplied {donotestimate}."))
+    }
+  }
+
   # AR models
-  AR_model <- lapply(vars, function(a_var) {
-    stats::lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var] %>% as.matrix())
-  })
+  if(is.null(donotestimate) || !(("AR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+    print(is.null(donotestimate))
+    print(!("AR" %in% toupper(donotestimate)))
+    print(!("ALL_OTHERS" %in% toupper(donotestimate)))
+    AR_model <- lapply(vars, function(a_var) {
+      stats::lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var] %>% as.matrix())
+    })
+  } else {
+    AR_model <- NULL
+  }
 
   # VAR models
-  VAR_model <- lapply(vars, function(a_var) {
-    do.call(tune.fit, c(list(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune)), SIS_options))
-  })
+  if(is.null(donotestimate) || !(("VAR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+    VAR_model <- lapply(vars, function(a_var) {
+      do.call(tune.fit, c(list(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune)), SIS_options))
+    })
+  } else {
+    VAR_model <- NULL
+  }
 
   # full VAR models
-  VAR_model_full <- lapply(vars, function(a_var) {
-    stats::lm(data_y %>% dplyr::pull(a_var) ~ ., data = data_x)
-  })
+  if(is.null(donotestimate) || !(("VAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+    VAR_model_full <- lapply(vars, function(a_var) {
+      stats::lm(data_y %>% dplyr::pull(a_var) ~ ., data = data_x)
+    })
+  } else {
+    VAR_model_full <- NULL
+  }
 
   # quadVAR models
   quadVAR_model <- lapply(vars, function(a_var) {
@@ -67,9 +100,13 @@ quadVAR <- function(data, vars, penalty = "LASSO", tune = "EBIC", SIS_options = 
   })
 
   # full quadVAR models
-  quadVAR_model_full <- lapply(vars, function(a_var) {
-    stats::lm(stats::as.formula(paste("data_y %>% dplyr::pull(a_var) ~ ", paste('poly(', paste(colnames(data_x), collapse = ","), ', degree = 2, raw = TRUE)', sep=''), collapse=" + ")), data = data_x)
-  })
+  if(is.null(donotestimate) || !(("QUADVAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+    quadVAR_model_full <- lapply(vars, function(a_var) {
+      stats::lm(stats::as.formula(paste("data_y %>% dplyr::pull(a_var) ~ ", paste('poly(', paste(colnames(data_x), collapse = ","), ', degree = 2, raw = TRUE)', sep=''), collapse=" + ")), data = data_x)
+    })
+  } else {
+    quadVAR_model_full <- NULL
+  }
 
   return(structure(list(
     AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options), class = "quadVAR"))
@@ -156,6 +193,22 @@ summary.quadVAR <- function(object, ...) {
     "quadVAR", quadVAR_df, quadVAR_IC,
     "quadVAR_full", quadVAR_full_df, quadVAR_full_IC
   )
+
+  if(is.null(object$AR_model)) {
+    output <- output %>% dplyr::filter(`Model` != "AR")
+  }
+  if(is.null(object$VAR_model)) {
+    output <- output %>% dplyr::filter(`Model` != "VAR")
+  }
+  if(is.null(object$VAR_model_full)) {
+    output <- output %>% dplyr::filter(`Model` != "VAR_full")
+  }
+  if(is.null(object$quadVAR_model)) {
+    output <- output %>% dplyr::filter(`Model` != "quadVAR")
+  }
+  if(is.null(object$quadVAR_model_full)) {
+    output <- output %>% dplyr::filter(`Model` != "quadVAR_full")
+  }
 
   minIC <- output$SumIC %>% min()
   output$DiffIC <- output$SumIC - minIC

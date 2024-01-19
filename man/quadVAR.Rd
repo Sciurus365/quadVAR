@@ -11,8 +11,11 @@
 quadVAR(
   data,
   vars,
+  dayvar = NULL,
+  beepvar = NULL,
   penalty = "LASSO",
   tune = "EBIC",
+  donotestimate = NULL,
   SIS_options = list(),
   RAMP_options = list()
 )
@@ -30,9 +33,19 @@ quadVAR(
 
 \item{vars}{A character vector of the variable names used in the model.}
 
+\item{dayvar}{
+String indicating assessment day. Adding this argument makes sure that the first measurement of a day is not regressed on the last measurement of the previous day. IMPORTANT: only add this if the data has multiple observations per day.
+}
+
+\item{beepvar}{
+Optional string indicating assessment beep per day. Adding this argument will cause non-consecutive beeps to be treated as missing!
+}
+
 \item{penalty}{The penalty used for the linear and regularized VAR models. Possible options include "LASSO", "SCAD", "MCP", with "LASSO" as the default.}
 
 \item{tune}{Tuning parameter selection method. Possible options include "AIC", "BIC", "EBIC", with "EBIC" as the default.}
+
+\item{donotestimate}{A character vector of the model names that are not estimated. Possible options include "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a \code{quadVAR} model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.}
 
 \item{SIS_options}{A list of other parameters for the \code{\link[SIS:tune.fit]{SIS::tune.fit()}} function. This is used for the regularized  VAR models.}
 

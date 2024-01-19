@@ -5,6 +5,7 @@
 #' 2. We use the ncvreg package exclusively (so we removed the code using the glmnet package). This is to make the result more consistent, and also because the ncvreg package has better support for the calculation of information criteria.
 #' 3. We also removed the generalized linear model (GLM) option, and the cross-validation option because we do not use them.
 #' 4. We use stats::AIC() and stats::BIC() instead of the ones using SIS:::loglik() to make the calculation methods more consistent.
+#' 5. We added `...` to allow the user to pass additional arguments to the ncvreg::ncvreg() function.
 #'
 #' Original description from [SIS::tune.fit()]:
 #'
@@ -25,12 +26,13 @@
 #'
 #'
 #' @inherit SIS::tune.fit
+#' @param ... additional arguments to be passed to the ncvreg::ncvreg() function.
 tune.fit <- function(x, y, family = "gaussian", penalty = c("SCAD", "MCP", "lasso"), concavity.parameter = switch(penalty,
                        SCAD = 3.7,
                        3
                      ), tune = c("aic", "bic", "ebic"),
                      type.measure = c("deviance", "class", "auc", "mse", "mae"),
-                     gamma.ebic = 1) {
+                     gamma.ebic = 1, ...) {
   ## SIS:::getdf()
   getdf <- function (coef.beta)
   {
@@ -50,7 +52,7 @@ tune.fit <- function(x, y, family = "gaussian", penalty = c("SCAD", "MCP", "lass
   n <- nrow(x)
   reg.fit <- ncvreg::ncvreg(x, y,
     family = family, penalty = penalty,
-    gamma = concavity.parameter
+    gamma = concavity.parameter, ...
   )
   coef.beta <- reg.fit$beta
   reg.df <- getdf(coef.beta[-1, , drop = FALSE])
