@@ -66,9 +66,6 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
 
   # AR models
   if(is.null(donotestimate) || !(("AR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
-    print(is.null(donotestimate))
-    print(!("AR" %in% toupper(donotestimate)))
-    print(!("ALL_OTHERS" %in% toupper(donotestimate)))
     AR_model <- lapply(vars, function(a_var) {
       stats::lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var] %>% as.matrix())
     })
