@@ -66,7 +66,7 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
 
   data_x <- data[index[[1]], vars]
   data_y <- data[index[[2]], vars]
-  d <- ncol(data)
+  d <- ncol(data_x)
 
   # check if there are constant variables
   if(any(apply(data_y, 2, function(x) length(unique(x)) == 1))) {
@@ -109,8 +109,27 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   }
 
   # quadVAR models
-  quadVAR_model <- lapply(vars, function(a_var) {
+  quadVAR_model <- tryCatch(lapply(vars, function(a_var) {
     do.call(RAMP::RAMP, c(list(X = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = penalty, tune = tune), RAMP_options))
+  }), error = function(e) {
+
+    # find possible interaction terms that are constant from data_x
+    constant_interaction_terms <- c()
+    for(i in 1:d) {
+      for(j in i:d) {
+        if(length(unique((data_x %>% pull(i)) * (data_x %>% pull(j)))) == 1) {
+          constant_interaction_terms <- c(constant_interaction_terms, paste(colnames(data_x)[i], colnames(data_x)[j], sep = "*"))
+        }
+      }
+    }
+    if (length(constant_interaction_terms) == 0) {
+      cli::cli_abort(c("Error in the estimation of quadVAR models.",
+                       "x" = "Original message from RAMP::RAMP: {e$message}"))
+    } else {
+      cli::cli_abort(c("Error in the estimation of quadVAR models.",
+                       "x" = "Original message from RAMP::RAMP: {e$message}",
+                       "i" = "One possible reason is that some of the interaction terms are constant, although non of the variables are constant. Possible constant interaction term(s) are: {paste(constant_interaction_terms, collapse = ', ')}. Try to add a constant value to the variables in the interaction terms."))
+    }
   })
 
   # full quadVAR models
