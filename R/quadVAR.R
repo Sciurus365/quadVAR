@@ -43,6 +43,18 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   penalty <- toupper(penalty)
   tune <- toupper(tune)
 
+  ## check if penalty is valid
+  if(!(penalty %in% c("LASSO", "SCAD", "MCP"))) {
+    cli::cli_abort(c("Invalid penalty.", i = "Possible options include: LASSO, SCAD, MCP (case insensitive).", "x" = "You've supplied {penalty}."))
+  }
+
+  ## check if tune is valid
+  if(!(tune %in% c("AIC", "BIC", "EBIC"))) {
+    cli::cli_abort(c("Invalid tune.", i = "Possible options include: AIC, BIC, EBIC (case insensitive).", "x" = "You've supplied {tune}."))
+  }
+
+  # select useful variables from the data
+
   data <- tibble::as_tibble(data[, c(vars, dayvar, beepvar), drop = FALSE])
   if(any(is.na(data))) {
     data <- stats::na.omit(data)
@@ -55,6 +67,11 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   data_x <- data[index[[1]], vars]
   data_y <- data[index[[2]], vars]
   d <- ncol(data)
+
+  # check if there are constant variables
+  if(any(apply(data_y, 2, function(x) length(unique(x)) == 1))) {
+    cli::cli_warn(c("There are constant variable(s) in the data. The constant variable(s) include {paste(vars[apply(data_y, 2, function(x) length(unique(x)) == 1)], collapse = ', ')}.", "i" = "Those variables may lead to errors in the estimation. Try removing those variables if errors are raised in the following steps."))
+  }
 
   # check if donotestimate only contains valid options
   if(!is.null(donotestimate)) {
@@ -255,11 +272,7 @@ generate_effect_term <- function(n_var) {
 #' @describeIn quadVAR Produce a plot for the linearized quadVAR model. Equivalent to first produce a linear quadVAR network using [linear_quadVAR_network()], then use [plot.linear_quadVAR_network()].
 #' @export
 #' @inheritParams linear_quadVAR_network
-plot.quadVAR <- function(x, value, value_standardized = TRUE, interactive = FALSE, ...) {
-  if(rlang::is_missing(value)) {
-    cli::cli_inform(c("i" = "The {.pkg quadVAR} model, being {.strong nonlinear}, generates a network {.strong meaningful only for specific variable values}. If values are unspecified, the plot defaults to the mean, but this may not be meaningful in all cases."), .frequency = "regularly", .frequency_id = "plot.quadVAR")
-    value <- 0
-  }
+plot.quadVAR <- function(x, value = NULL, value_standardized = TRUE, interactive = FALSE, ...) {
   linear_result <- linear_quadVAR_network(x, value = value, value_standardized = value_standardized)
   plot(linear_result, interactive = interactive, ...)
 }

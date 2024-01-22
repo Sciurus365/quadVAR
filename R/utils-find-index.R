@@ -12,12 +12,12 @@ find_index <- function(data, dayvar, beepvar) {
 
   if(!is.null(dayvar)) {
     all_index <- all_index %>%
-      dplyr::mutate(same_day = data_index %in% which(diff(data %>% pull(dayvar)) == 0)) %>%
+      dplyr::mutate(same_day = data_index %in% which(diff(data %>% dplyr::pull(dayvar)) == 0)) %>%
       dplyr::filter(same_day)
   }
   if(!is.null(beepvar)) {
     all_index <- all_index %>%
-      dplyr::mutate(consecutive_beep = data_index %in% which(diff(data%>% pull(beepvar)) == 1)) %>%
+      dplyr::mutate(consecutive_beep = data_index %in% which(diff(data%>% dplyr::pull(beepvar)) == 1)) %>%
       dplyr::filter(consecutive_beep)
   }
 

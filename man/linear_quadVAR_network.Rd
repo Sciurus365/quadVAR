@@ -5,16 +5,16 @@
 \alias{plot.linear_quadVAR_network}
 \title{Linearize a quadVAR object to produce a network.}
 \usage{
-linear_quadVAR_network(model, value = 0, value_standardized = TRUE)
+linear_quadVAR_network(model, value = NULL, value_standardized = TRUE)
 
 \method{plot}{linear_quadVAR_network}(x, interactive = FALSE, ...)
 }
 \arguments{
 \item{model}{A quadVAR object.}
 
-\item{value}{A numeric vector of length 1 or the same as the number of nodes, that specifies the values of the variables that the linearized model will be based on. If the length is 1, the same value will be used for all variables.}
+\item{value}{A numeric vector of length 1 or the same as the number of nodes, that specifies the values of the variables that the linearized model will be based on. If the length is 1, the same value will be used for all variables. The default value is \code{NULL}, in which case the value will be set to 0 in calculation, which means (if \code{value_standardized = TRUE}) the linearized model will be based on the mean values of all variables.}
 
-\item{value_standardized}{A logical value that specifies whether the input value is standardized or not. If TRUE, the input value will be regarded as standardized value, i.e., mean + ? * sd (e.g., 0 is the mean, 1 is mean + sd, ...). If FALSE, the input value will regarded as in the raw scale of the input data.}
+\item{value_standardized}{A logical value that specifies whether the input value is standardized or not. If TRUE, the input value will be regarded as standardized value, i.e., mean + \code{value} * sd (e.g., 0 is the mean, 1 is mean + sd, ...). If FALSE, the input value will regarded as in the raw scale of the input data. If the raw dataset was already standardized, this parameter does not have an effect. The default value is \code{TRUE}.}
 
 \item{x}{A linear_quadVAR_network object.}
 

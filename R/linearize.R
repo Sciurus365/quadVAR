@@ -5,8 +5,8 @@
 #' @references The idea of this linearization function is inspired by Kroc, E., & Olvera Astivia, O. L. (2023). The case for the curve: Parametric regression with second- and third-order polynomial functions of predictors should be routine. Psychological Methods. https://doi.org/10.1037/met0000629
 #'
 #' @param model A quadVAR object.
-#' @param value A numeric vector of length 1 or the same as the number of nodes, that specifies the values of the variables that the linearized model will be based on. If the length is 1, the same value will be used for all variables.
-#' @param value_standardized A logical value that specifies whether the input value is standardized or not. If TRUE, the input value will be regarded as standardized value, i.e., mean + ? * sd (e.g., 0 is the mean, 1 is mean + sd, ...). If FALSE, the input value will regarded as in the raw scale of the input data.
+#' @param value A numeric vector of length 1 or the same as the number of nodes, that specifies the values of the variables that the linearized model will be based on. If the length is 1, the same value will be used for all variables. The default value is `NULL`, in which case the value will be set to 0 in calculation, which means (if `value_standardized = TRUE`) the linearized model will be based on the mean values of all variables.
+#' @param value_standardized A logical value that specifies whether the input value is standardized or not. If TRUE, the input value will be regarded as standardized value, i.e., mean + `value` * sd (e.g., 0 is the mean, 1 is mean + sd, ...). If FALSE, the input value will regarded as in the raw scale of the input data. If the raw dataset was already standardized, this parameter does not have an effect. The default value is `TRUE`.
 #' @return A linear_quadVAR_network with the following elements:
 #' \itemize{
 #'  \item `adj_mat`: the adjacency matrix of the linearized network.
@@ -17,7 +17,12 @@
 #'  }
 #' @export
 #'
-linear_quadVAR_network <- function(model, value = 0, value_standardized = TRUE) {
+linear_quadVAR_network <- function(model, value = NULL, value_standardized = TRUE) {
+  if(is.null(value)) {
+    cli::cli_inform(c("i" = "The {.pkg quadVAR} model, being {.strong nonlinear}, generates a network {.strong meaningful only for specific variable values}. If values are unspecified, the linearization/the plot defaults to 0 (i.e., the mean values of all variables if `value_standardized = TRUE`), but this is not a complete description of the model estimation and may not be meaningful in all cases."), .frequency = "regularly", .frequency_id = "plot.quadVAR")
+    value <- 0
+  }
+
   # check if the length of value is 1 or the same as the number of nodes, using rlang
   if(length(value) != 1 && length(value) != ncol(model$data)) {
     cli::cli_abort("The length of value must be 1 or the same as the number of variables. The length of value is {length(value)}, while the number of variables is {ncol(model$data)}.")
