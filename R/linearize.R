@@ -70,6 +70,8 @@ get_adj_mat <- function(model, value) {
     adj_mat[, i] <- stats::deriv(rlang::parse_expr(eq), namevec = paste0("X", 1:n_nodes)) %>% eval(envir = as.list(value)) %>% attr("gradient")
   }
 
+  colnames(adj_mat) <- rownames(adj_mat) <- colnames(model$data)
+
   return(adj_mat)
 }
 
