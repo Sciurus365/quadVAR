@@ -117,7 +117,7 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
     constant_interaction_terms <- c()
     for(i in 1:d) {
       for(j in i:d) {
-        if(length(unique((data_x %>% pull(i)) * (data_x %>% pull(j)))) == 1) {
+        if(length(unique((data_x %>% dplyr::pull(i)) * (data_x %>% dplyr::pull(j)))) == 1) {
           constant_interaction_terms <- c(constant_interaction_terms, paste(colnames(data_x)[i], colnames(data_x)[j], sep = "*"))
         }
       }
