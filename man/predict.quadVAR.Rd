@@ -4,12 +4,14 @@
 \alias{predict.quadVAR}
 \title{Predict the values of the dependent variables using the quadVAR model}
 \usage{
-\method{predict}{quadVAR}(object, newdata = NULL, ...)
+\method{predict}{quadVAR}(object, newdata = NULL, donotpredict = NULL, ...)
 }
 \arguments{
 \item{object}{A quadVAR object.}
 
 \item{newdata}{A data frame or tibble containing at least the values of the independent variables, dayvar, and beepvar (if used in model estimation). If NULL, the original data used to fit the model will be used.}
+
+\item{donotpredict}{NOT IMPLEMENTED YET! A character vector of the model names that are not used for prediction. Possible options include "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a \code{quadVAR} model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.}
 
 \item{...}{Other arguments passed to the \code{\link[RAMP:predict.RAMP]{RAMP::predict.RAMP()}} function.}
 }
