@@ -4,19 +4,33 @@
 \alias{block_cv}
 \title{Use Block Cross-Validation to Evaluate Models}
 \usage{
-block_cv(data, dayvar = NULL, model, block = 10)
+block_cv(
+  data,
+  dayvar = NULL,
+  model,
+  block = 10,
+  lowerbound = -Inf,
+  upperbound = Inf,
+  detail = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame.}
 
-\item{dayvar}{A character string. The name of the variable that represents the day. This is required because this function use dayvar to specify the time point before the test block should not be used to predict the time point after the test block. If dayvar is not specified, then the function will create a new variable called "dayvar", which is a constant, and use it as the dayvar.}
+\item{dayvar}{A character string. The name of the variable that represents the day. This is required because this function use dayvar to specify the time point before the test block should not be used to predict the time point after the test block. If dayvar is not specified, in the original dataset, then please add one constant variable as dayvar, and specify it both here and in the function passed to \code{model}.}
 
 \item{model}{A function. The model to be evaluated. The function should take a data frame as its first argument and return a \code{quadVAR} object. It can be, for example, \code{function(x) quadVAR(x, vars = c("var1", "var2"))}}
 
 \item{block}{An integer. The number of blocks to use in the cross-validation. The default is 10.}
+
+\item{lowerbound}{A numeric value or a vector with the same length as the number of variables that specifies the lower bound of the predicted values. If the predicted value is less than this value, it will be replaced by this value. The default value is -Inf.}
+
+\item{upperbound}{A numeric value or a vector with the same length as the number of variables that specifies  the upper bound of the predicted values. If the predicted value is greater than this value, it will be replaced by this value. The default value is Inf.}
+
+\item{detail}{A logical. If \code{TRUE}, the function will return the predictions for each model. The default is \code{FALSE}, which only returns the mean squared error for each model.}
 }
 \value{
-A list of mean squared errors for each model.
+Depending on \code{detail}. If \code{FALSE}, it returns a list of mean squared errors for each model. If \code{TRUE}, it returns a list with the mean squared errors for each model, the true data, and the predictions for each model.
 }
 \description{
 This function uses block cross-validation to evaluate a model. The data is split into blocks, and the model is fit on all but one block and evaluated on the remaining block. This process is repeated for each block, and the mean squared error is calculated for each model.

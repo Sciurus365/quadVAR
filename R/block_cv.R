@@ -56,22 +56,24 @@ block_cv_split <- function(data, block = 10) {
 #' This function uses block cross-validation to evaluate a model. The data is split into blocks, and the model is fit on all but one block and evaluated on the remaining block. This process is repeated for each block, and the mean squared error is calculated for each model.
 #'
 #' @param data A data frame.
-#' @param dayvar A character string. The name of the variable that represents the day. This is required because this function use dayvar to specify the time point before the test block should not be used to predict the time point after the test block. If dayvar is not specified, then the function will create a new variable called "dayvar", which is a constant, and use it as the dayvar.
+#' @param dayvar A character string. The name of the variable that represents the day. This is required because this function use dayvar to specify the time point before the test block should not be used to predict the time point after the test block. If dayvar is not specified, in the original dataset, then please add one constant variable as dayvar, and specify it both here and in the function passed to `model`.
 #' @param model A function. The model to be evaluated. The function should take a data frame as its first argument and return a `quadVAR` object. It can be, for example, `function(x) quadVAR(x, vars = c("var1", "var2"))`
 #' @param block An integer. The number of blocks to use in the cross-validation. The default is 10.
-#' @return A list of mean squared errors for each model.
+#' @inheritParams predict.quadVAR
+#' @param detail A logical. If `TRUE`, the function will return the predictions for each model. The default is `FALSE`, which only returns the mean squared error for each model.
+#' @return Depending on `detail`. If `FALSE`, it returns a list of mean squared errors for each model. If `TRUE`, it returns a list with the mean squared errors for each model, the true data, and the predictions for each model.
 #' @export
-block_cv <- function(data, dayvar = NULL, model, block = 10) {
+block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, upperbound = Inf, detail = FALSE) {
   # split the data
   indices <- block_cv_split(data, block)
 
   # create a list to store the predictions
   preds <- vector("list", length = length(indices))
 
-  if (is.null(dayvar)) {
-    data$dayvar <- 1
-    dayvar <- "dayvar"
-  }
+  # if (is.null(dayvar)) {
+  #   data$dayvar <- 1
+  #   dayvar <- "dayvar"
+  # }
 
   # loop over each fold
   for (i in 1:length(indices)) {
@@ -89,7 +91,7 @@ block_cv <- function(data, dayvar = NULL, model, block = 10) {
     # fit the model on the training set
     fit <- model(data[indices[[i]]$train, ])
     # make predictions on the testing set
-    preds[[i]] <- stats::predict(fit, newdata = data[indices[[i]]$test, ])
+    preds[[i]] <- stats::predict(fit, newdata = data[indices[[i]]$test, ], lowerbound = lowerbound, upperbound = upperbound)
   }
 
   # return(preds)
@@ -100,6 +102,16 @@ block_cv <- function(data, dayvar = NULL, model, block = 10) {
 
   names(mse) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR")
 
+  all_preds <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR"), function(model_type) do.call(rbind, lapply(preds, function(x) x[[model_type]])))
+  names(all_preds) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR")
   # return the MSE
-  return(mse)
+  if (detail) {
+    return(list(
+      mse = mse,
+      true_data = data[, fit$vars],
+      all_preds = all_preds
+    ))
+  } else {
+    return(mse)
+  }
 }
