@@ -27,7 +27,7 @@
 #' @examples
 #' set.seed(1614)
 #' data <- sim_4_emo(time = 200, sd = 1)
-#' plot(data[,"x1"])
+#' plot(data[, "x1"])
 #' qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"))
 #' summary(qV1)
 #' coef(qV1)
@@ -44,19 +44,19 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   tune <- toupper(tune)
 
   ## check if penalty is valid
-  if(!(penalty %in% c("LASSO", "SCAD", "MCP"))) {
+  if (!(penalty %in% c("LASSO", "SCAD", "MCP"))) {
     cli::cli_abort(c("Invalid penalty.", i = "Possible options include: LASSO, SCAD, MCP (case insensitive).", "x" = "You've supplied {penalty}."))
   }
 
   ## check if tune is valid
-  if(!(tune %in% c("AIC", "BIC", "EBIC"))) {
+  if (!(tune %in% c("AIC", "BIC", "EBIC"))) {
     cli::cli_abort(c("Invalid tune.", i = "Possible options include: AIC, BIC, EBIC (case insensitive).", "x" = "You've supplied {tune}."))
   }
 
   # select useful variables from the data
 
   data <- tibble::as_tibble(data[, c(vars, dayvar, beepvar), drop = FALSE])
-  if(any(is.na(data))) {
+  if (any(is.na(data))) {
     data <- stats::na.omit(data)
     cli::cli_warn("Missing values detected in either `vars`, `dayvar`, or `beepvar`. {.pkg quadVAR} does not support data imputation at the moment. Thus, all the time points with missing values have been removed.")
   }
@@ -69,20 +69,20 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   d <- ncol(data_x)
 
   # check if there are constant variables
-  if(any(apply(data_y, 2, function(x) length(unique(x)) == 1))) {
+  if (any(apply(data_y, 2, function(x) length(unique(x)) == 1))) {
     cli::cli_warn(c("There are constant variable(s) in the data. The constant variable(s) include {paste(vars[apply(data_y, 2, function(x) length(unique(x)) == 1)], collapse = ', ')}.", "i" = "Those variables may lead to errors in the estimation. Try removing those variables if errors are raised in the following steps."))
   }
 
   # check if donotestimate only contains valid options
-  if(!is.null(donotestimate)) {
+  if (!is.null(donotestimate)) {
     upper_donotestimate <- toupper(donotestimate)
-    if(any(!(upper_donotestimate %in% c("AR", "VAR", "VAR_FULL", "QUADVAR_FULL", "ALL_OTHERS")))) {
+    if (any(!(upper_donotestimate %in% c("AR", "VAR", "VAR_FULL", "QUADVAR_FULL", "ALL_OTHERS")))) {
       cli::cli_abort(c("Invalid options in donotestimate.", i = "Possible options include: AR, VAR, VAR_full, quadVAR_full, all_others (case insensitive).", "x" = "You've supplied {donotestimate}."))
     }
   }
 
   # AR models
-  if(is.null(donotestimate) || !(("AR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+  if (is.null(donotestimate) || !(("AR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
     AR_model <- lapply(vars, function(a_var) {
       stats::lm(data_y %>% dplyr::pull(a_var) ~ data_x[, a_var] %>% as.matrix())
     })
@@ -91,7 +91,7 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   }
 
   # VAR models
-  if(is.null(donotestimate) || !(("VAR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+  if (is.null(donotestimate) || !(("VAR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
     VAR_model <- lapply(vars, function(a_var) {
       do.call(tune.fit, c(list(x = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = ifelse(penalty == "LASSO", "lasso", penalty), tune = tolower(tune)), SIS_options))
     })
@@ -100,7 +100,7 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   }
 
   # full VAR models
-  if(is.null(donotestimate) || !(("VAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+  if (is.null(donotestimate) || !(("VAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
     VAR_model_full <- lapply(vars, function(a_var) {
       stats::lm(data_y %>% dplyr::pull(a_var) ~ ., data = data_x)
     })
@@ -112,37 +112,39 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   quadVAR_model <- tryCatch(lapply(vars, function(a_var) {
     do.call(RAMP::RAMP, c(list(X = data_x %>% as.matrix(), y = data_y %>% dplyr::pull(a_var), penalty = penalty, tune = tune), RAMP_options))
   }), error = function(e) {
-
     # find possible interaction terms that are constant from data_x
     constant_interaction_terms <- c()
-    for(i in 1:d) {
-      for(j in i:d) {
-        if(length(unique((data_x %>% dplyr::pull(i)) * (data_x %>% dplyr::pull(j)))) == 1) {
+    for (i in 1:d) {
+      for (j in i:d) {
+        if (length(unique((data_x %>% dplyr::pull(i)) * (data_x %>% dplyr::pull(j)))) == 1) {
           constant_interaction_terms <- c(constant_interaction_terms, paste(colnames(data_x)[i], colnames(data_x)[j], sep = "*"))
         }
       }
     }
     if (length(constant_interaction_terms) == 0) {
       cli::cli_abort(c("Error in the estimation of quadVAR models.",
-                       "x" = "Original message from RAMP::RAMP: {e$message}"))
+        "x" = "Original message from RAMP::RAMP: {e$message}"
+      ))
     } else {
       cli::cli_abort(c("Error in the estimation of quadVAR models.",
-                       "x" = "Original message from RAMP::RAMP: {e$message}",
-                       "i" = "One possible reason is that some of the interaction terms are constant, although non of the variables are constant. Possible constant interaction term(s) are: {paste(constant_interaction_terms, collapse = ', ')}. Try to add a constant value to the variables in the interaction terms."))
+        "x" = "Original message from RAMP::RAMP: {e$message}",
+        "i" = "One possible reason is that some of the interaction terms are constant, although non of the variables are constant. Possible constant interaction term(s) are: {paste(constant_interaction_terms, collapse = ', ')}. Try to add a constant value to the variables in the interaction terms."
+      ))
     }
   })
 
   # full quadVAR models
-  if(is.null(donotestimate) || !(("QUADVAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+  if (is.null(donotestimate) || !(("QUADVAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
     quadVAR_model_full <- lapply(vars, function(a_var) {
-      stats::lm(stats::as.formula(paste("data_y %>% dplyr::pull(a_var) ~ ", paste('poly(', paste(colnames(data_x), collapse = ","), ', degree = 2, raw = TRUE)', sep=''), collapse=" + ")), data = data_x)
+      stats::lm(stats::as.formula(paste("data_y %>% dplyr::pull(a_var) ~ ", paste("poly(", paste(colnames(data_x), collapse = ","), ", degree = 2, raw = TRUE)", sep = ""), collapse = " + ")), data = data_x)
     })
   } else {
     quadVAR_model_full <- NULL
   }
 
   return(structure(list(
-    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options), class = "quadVAR"))
+    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
+  ), class = "quadVAR"))
 }
 
 #' @describeIn quadVAR Print the summary for a quadVAR object. See [summary.quadVAR()] for details. Note that this function does not automatically print all the coefficients. Use [coef.quadVAR()] to extract the coefficients.
@@ -155,68 +157,83 @@ print.quadVAR <- function(x, ...) {
 #' @export
 summary.quadVAR <- function(object, ...) {
   if (object$tune == "BIC" | object$tune == "EBIC") {
-      AR_IC <- object$AR_model %>%
-        lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
-        unlist() %>% sum()
-
-      VAR_IC <- object$VAR_model %>%
-        lapply(function(x) x$ic) %>%
-        unlist() %>% sum()
-
-      VAR_full_IC <- object$VAR_model_full %>%
-        lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
-        unlist() %>% sum()
-
-      quadVAR_IC <- object$quadVAR_model %>%
-        lapply(function(x) {
-          n <- x$y %>% length()
-          x$cri.list[x$cri.loc] + n + n*log(2*pi) + 2*log(n)
-          }) %>%
-        unlist() %>% sum()
-
-      quadVAR_full_IC <- object$quadVAR_model_full %>%
-        lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
-        unlist() %>% sum()
-  } else if (object$tune == "AIC") {
     AR_IC <- object$AR_model %>%
-      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
-      unlist() %>% sum()
+      lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
 
     VAR_IC <- object$VAR_model %>%
       lapply(function(x) x$ic) %>%
-      unlist() %>% sum()
+      unlist() %>%
+      sum()
 
     VAR_full_IC <- object$VAR_model_full %>%
-      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
-      unlist() %>% sum()
+      lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
 
     quadVAR_IC <- object$quadVAR_model %>%
       lapply(function(x) {
         n <- x$y %>% length()
-        x$cri.list[x$cri.loc] + n + n*log(2*pi) + 2*2
+        x$cri.list[x$cri.loc] + n + n * log(2 * pi) + 2 * log(n)
       }) %>%
-      unlist() %>% sum()
+      unlist() %>%
+      sum()
+
+    quadVAR_full_IC <- object$quadVAR_model_full %>%
+      lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
+  } else if (object$tune == "AIC") {
+    AR_IC <- object$AR_model %>%
+      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
+
+    VAR_IC <- object$VAR_model %>%
+      lapply(function(x) x$ic) %>%
+      unlist() %>%
+      sum()
+
+    VAR_full_IC <- object$VAR_model_full %>%
+      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
+
+    quadVAR_IC <- object$quadVAR_model %>%
+      lapply(function(x) {
+        n <- x$y %>% length()
+        x$cri.list[x$cri.loc] + n + n * log(2 * pi) + 2 * 2
+      }) %>%
+      unlist() %>%
+      sum()
 
     quadVAR_full_IC <- object$quadVAR_model_full %>%
       lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
-      unlist() %>% sum()
+      unlist() %>%
+      sum()
   }
 
   AR_df <- object$AR_model %>%
     lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
-    unlist() %>% sum()
+    unlist() %>%
+    sum()
   VAR_df <- object$VAR_model %>%
     lapply(function(x) length(x$beta)) %>%
-    unlist() %>% sum()
+    unlist() %>%
+    sum()
   VAR_full_df <- object$VAR_model_full %>%
     lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
-    unlist() %>% sum()
+    unlist() %>%
+    sum()
   quadVAR_df <- object$quadVAR_model %>%
     lapply(function(x) x$df[x$cri.loc]) %>%
-    unlist() %>% sum()
+    unlist() %>%
+    sum()
   quadVAR_full_df <- object$quadVAR_model_full %>%
     lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
-    unlist() %>% sum()
+    unlist() %>%
+    sum()
 
   output <- tibble::tribble(
     ~`Model`, ~`Sumdf`, ~`SumIC`,
@@ -227,35 +244,35 @@ summary.quadVAR <- function(object, ...) {
     "quadVAR_full", quadVAR_full_df, quadVAR_full_IC
   )
 
-  if(is.null(object$AR_model)) {
+  if (is.null(object$AR_model)) {
     output <- output %>% dplyr::filter(`Model` != "AR")
   }
-  if(is.null(object$VAR_model)) {
+  if (is.null(object$VAR_model)) {
     output <- output %>% dplyr::filter(`Model` != "VAR")
   }
-  if(is.null(object$VAR_model_full)) {
+  if (is.null(object$VAR_model_full)) {
     output <- output %>% dplyr::filter(`Model` != "VAR_full")
   }
-  if(is.null(object$quadVAR_model)) {
+  if (is.null(object$quadVAR_model)) {
     output <- output %>% dplyr::filter(`Model` != "quadVAR")
   }
-  if(is.null(object$quadVAR_model_full)) {
+  if (is.null(object$quadVAR_model_full)) {
     output <- output %>% dplyr::filter(`Model` != "quadVAR_full")
   }
 
   minIC <- output$SumIC %>% min()
   output$DiffIC <- output$SumIC - minIC
-  output$Weight <- exp(-output$DiffIC/2)/sum(exp(-output$DiffIC/2))
+  output$Weight <- exp(-output$DiffIC / 2) / sum(exp(-output$DiffIC / 2))
   return(output)
 }
 
 #' @describeIn quadVAR Extract the coefficients from a quadVAR object.
 #' @export
-coef.quadVAR <- function(object, silent = FALSE,  ...) {
+coef.quadVAR <- function(object, silent = FALSE, ...) {
   n_var <- object$data %>% ncol()
 
   output <- data.frame(
-    model = rep(1:n_var, each = 2*n_var + choose(n_var, 2)),
+    model = rep(1:n_var, each = 2 * n_var + choose(n_var, 2)),
     effect = rep(generate_effect_term(n_var), n_var),
     estimate = 0
   )
@@ -272,7 +289,7 @@ coef.quadVAR <- function(object, silent = FALSE,  ...) {
   output_toprint <- output
   output_toprint$estimate <- round(output_toprint$estimate, 2)
 
-  if(!silent) print(output_toprint)
+  if (!silent) print(output_toprint)
 
   invisible(output)
 }
@@ -281,7 +298,7 @@ generate_effect_term <- function(n_var) {
   output_linear <- paste0("X", 1:n_var)
   output_quad <- tidyr::crossing(Var1 = 1:n_var, Var2 = 1:n_var) %>%
     dplyr::filter(Var1 <= Var2) %>%
-    apply(c(1,2), function(x) paste0("X", x)) %>%
+    apply(c(1, 2), function(x) paste0("X", x)) %>%
     apply(1, function(x) paste0(x, collapse = "")) %>%
     as.character()
   output <- c(output_linear, output_quad)

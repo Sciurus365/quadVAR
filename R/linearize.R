@@ -18,24 +18,24 @@
 #' @export
 #'
 linear_quadVAR_network <- function(model, value = NULL, value_standardized = TRUE) {
-  if(is.null(value)) {
+  if (is.null(value)) {
     cli::cli_inform(c("i" = "The {.pkg quadVAR} model, being {.strong nonlinear}, generates a network {.strong meaningful only for specific variable values}. If values are unspecified, the linearization/the plot defaults to 0 (i.e., the mean values of all variables if `value_standardized = TRUE`), but this is not a complete description of the model estimation and may not be meaningful in all cases."), .frequency = "regularly", .frequency_id = "plot.quadVAR")
     value <- 0
   }
 
   # check if the length of value is 1 or the same as the number of nodes, using rlang
-  if(length(value) != 1 && length(value) != ncol(model$data)) {
+  if (length(value) != 1 && length(value) != ncol(model$data)) {
     cli::cli_abort("The length of value must be 1 or the same as the number of variables. The length of value is {length(value)}, while the number of variables is {ncol(model$data)}.")
   }
 
-  if(length(value) == 1) {
+  if (length(value) == 1) {
     value <- rep(value, ncol(model$data))
   }
 
   data_mean <- colMeans(model$data)
   data_sd <- apply(model$data, 2, stats::sd)
 
-  if(value_standardized) {
+  if (value_standardized) {
     standardized_value <- value
     actual_value <- value * data_sd + data_mean
   } else {
@@ -64,10 +64,12 @@ get_adj_mat <- function(model, value) {
   # all partial derivatives are calculated at the value of the variables.
   # they together form the matrix we need.
 
-  for(i in 1:n_nodes) {
+  for (i in 1:n_nodes) {
     eq <- model_eqs[[i]]
     # return(eq)
-    adj_mat[, i] <- stats::deriv(rlang::parse_expr(eq), namevec = paste0("X", 1:n_nodes)) %>% eval(envir = as.list(value)) %>% attr("gradient")
+    adj_mat[, i] <- stats::deriv(rlang::parse_expr(eq), namevec = paste0("X", 1:n_nodes)) %>%
+      eval(envir = as.list(value)) %>%
+      attr("gradient")
   }
 
   colnames(adj_mat) <- rownames(adj_mat) <- colnames(model$data)
@@ -92,12 +94,12 @@ quadVAR_to_dyn_eqns <- function(model, minus_self = TRUE) {
     # remove terms with zero estimates.
     dplyr::filter(estimate != 0)
 
-  for(j in 1:n_nodes){
+  for (j in 1:n_nodes) {
     model_summary_j <- model_summary %>% dplyr::filter(model == j)
     df_terms <- model_summary_j %>% tidyr::unite("term", estimate, effect, sep = "*")
     eqs[[j]] <- paste0(df_terms$term, collapse = " + ")
-    if(minus_self) eqs[[j]] <- paste0(eqs[[j]], " - X", j)
-    if(eqs[[j]] == "") eqs[[j]] <- "0"
+    if (minus_self) eqs[[j]] <- paste0(eqs[[j]], " - X", j)
+    if (eqs[[j]] == "") eqs[[j]] <- "0"
   }
 
   return(eqs)
@@ -109,14 +111,14 @@ quadVAR_to_dyn_eqns <- function(model, minus_self = TRUE) {
 #' @param ... Other arguments passed to [qgraph::qgraph()].
 #' @export
 plot.linear_quadVAR_network <- function(x, interactive = FALSE, ...) {
-  if(!interactive) {
+  if (!interactive) {
     qgraph::qgraph(x$adj_mat, directed = TRUE, diag = TRUE, ...)
   } else {
     n_nodes <- ncol(x$model$data)
     original_qg <- plot(x, interactive = FALSE)
     original_layout <- original_qg$layout
 
-    if(x$value_standardized) {
+    if (x$value_standardized) {
       range_mins <- rep(-3, n_nodes)
       range_maxs <- rep(3, n_nodes)
       var_means <- rep(0, n_nodes)
@@ -134,7 +136,7 @@ plot.linear_quadVAR_network <- function(x, interactive = FALSE, ...) {
     }
 
     sliders <- vector("list", n_nodes)
-    for(i in 1:n_nodes) {
+    for (i in 1:n_nodes) {
       sliders[[i]] <- shiny::sliderInput(paste0("slider_X", i), label = paste0("X", i), min = range_mins[i], max = range_maxs[i], value = var_means[i], step = steps[i])
     }
     ui <- shiny::fluidPage(
@@ -178,4 +180,3 @@ plot.linear_quadVAR_network <- function(x, interactive = FALSE, ...) {
     shiny::shinyApp(ui = ui, server = server)
   }
 }
-

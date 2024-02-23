@@ -10,7 +10,7 @@
 #'
 #' @seealso [true_model_4_emo()], [compare_4_emo()], [quadVAR()]
 #' @export
-sim_4_emo <-  function(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 0.2){
+sim_4_emo <- function(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 0.2) {
   output <- matrix(nrow = time, ncol = 5)
   colnames(output) <- c("time", "x1", "x2", "x3", "x4")
   output[, 1] <- 1:time
@@ -83,7 +83,7 @@ coef.true_model_4_emo <- function(object, silent = FALSE, ...) {
   output_toprint <- output
   output_toprint$estimate <- round(output_toprint$estimate, 2)
 
-  if(!silent) print(output_toprint)
+  if (!silent) print(output_toprint)
 
   invisible(output)
 }
@@ -95,12 +95,11 @@ coef.true_model_4_emo <- function(object, silent = FALSE, ...) {
 #' @export
 print.true_model_4_emo <- function(x, which = NULL, ...) {
   if (is.null(which)) {
-    for(i in 1:4) {
+    for (i in 1:4) {
       cat("[[", i, "]]\n", sep = "")
       print(x, which = i)
     }
-  }
-  else if (which == 1) {
+  } else if (which == 1) {
     cat("True main effects: 1 2 3 4\n")
     cat("Coefficients for main effects: 0.36, 0.06, -0.3, -0.3\n")
     cat("True Interaction effects: X1X1 X1X2 X1X3 X1X4\n")
@@ -172,8 +171,7 @@ compare_4_emo <- function(model, silent = FALSE) {
   output_toprint$estimate <- round(output_toprint$estimate, 2)
   output_toprint$true <- round(output_toprint$true, 2)
 
-  if(!silent) print(output_toprint)
+  if (!silent) print(output_toprint)
 
   invisible(output)
 }
-

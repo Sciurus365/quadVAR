@@ -87,17 +87,15 @@ This function fits a generalized linear model or a Cox proportional hazards mode
 \examples{
 \dontrun{
 set.seed(0)
-data('leukemia.train', package = 'SIS')
-y.train = leukemia.train[,dim(leukemia.train)[2]]
-x.train = as.matrix(leukemia.train[,-dim(leukemia.train)[2]])
-x.train = standardize(x.train)
-model = tune.fit(x.train[,1:3500], y.train, family='binomial', tune='bic')
+data("leukemia.train", package = "SIS")
+y.train <- leukemia.train[, dim(leukemia.train)[2]]
+x.train <- as.matrix(leukemia.train[, -dim(leukemia.train)[2]])
+x.train <- standardize(x.train)
+model <- tune.fit(x.train[, 1:3500], y.train, family = "binomial", tune = "bic")
 model$ix
 model$a0
 model$beta
 }
-
-
 
 }
 \references{

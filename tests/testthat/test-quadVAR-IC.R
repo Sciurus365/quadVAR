@@ -41,6 +41,6 @@ temp_mimic_quadVAR_BIC <- structure(
 )
 
 test_that("AIC and BIC measures are unified across packages", {
-  expect_equal(summary(temp_mimic_quadVAR_AIC)$DiffIC, rep(0,5))
-  expect_equal(summary(temp_mimic_quadVAR_BIC)$DiffIC, rep(0,5))
+  expect_equal(summary(temp_mimic_quadVAR_AIC)$DiffIC, rep(0, 5))
+  expect_equal(summary(temp_mimic_quadVAR_BIC)$DiffIC, rep(0, 5))
 })

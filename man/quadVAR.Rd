@@ -91,7 +91,7 @@ This function estimate regularized nonlinear quadratic vector autoregression mod
 \examples{
 set.seed(1614)
 data <- sim_4_emo(time = 200, sd = 1)
-plot(data[,"x1"])
+plot(data[, "x1"])
 qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"))
 summary(qV1)
 coef(qV1)
