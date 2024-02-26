@@ -22,6 +22,7 @@
 #'  \item `quadVAR`: A list of regularized nonlinear quadratic VAR models for each variable.
 #'  \item `fullquadVAR`: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
 #'  \item `data`,`vars`,`penalty`,`tune`,`SIS_options`,`RAMP_options`: The input arguments.
+#'  \item `data_x`,`data_y`: The data directly used for modeling.
 #'  }
 #'
 #' @examples
@@ -143,7 +144,7 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   }
 
   return(structure(list(
-    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
+    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, data_x = data_x, data_y = data_y, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
   ), class = "quadVAR"))
 }
 

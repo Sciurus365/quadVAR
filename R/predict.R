@@ -30,8 +30,8 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
   # data_y_out has the same shape as data_y, but all values are NA
   data_y_out <- apply(data_y, c(1, 2), function(x) NA)
 
-  data_y_out_all <- rep(list(data_y_out), 5)
-  names(data_y_out_all) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR")
+  data_y_out_all <- rep(list(data_y_out), 6)
+  names(data_y_out_all) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
 
   # make predictions
   ## for the i-th row in data_x, use model$quadVAR_model[[j]] to predict data_y[i,j]
@@ -50,14 +50,16 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
         lm_coef <- object$AR_model[[j]]$coef
         data_y_out_all$AR[i, j] <- as.numeric(lm_coef[1] + lm_coef[2] * data_y[i, j]) %>% constrain(lowerbound[j], upperbound[j])
       }
+
+      data_y_out_all$NULL_model[i, j] <- mean(object$data_y[,j] %>% unlist() %>% mean, na.rm = TRUE) %>% constrain(lowerbound[j], upperbound[j])
     }
   }
 
   data_out <- apply(data[, object$vars], c(1, 2), function(x) NA)
 
-  data_out_all <- rep(list(data_out), 5)
-  names(data_out_all) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR")
-  for (i in 1:5) {
+  data_out_all <- rep(list(data_out), 6)
+  names(data_out_all) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
+  for (i in 1:6) {
     data_out_all[[i]][index[[2]], ] <- data_y_out_all[[i]]
   }
 

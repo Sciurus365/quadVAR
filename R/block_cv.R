@@ -98,12 +98,12 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
 
   # calculate MSE
   # return(list(data[,fit$vars], do.call(rbind, preds)))
-  mse <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR"), function(model_type) mean((as.matrix(data[, fit$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
+  mse <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean((as.matrix(data[, fit$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
 
-  names(mse) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR")
+  names(mse) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
 
-  all_preds <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR"), function(model_type) do.call(rbind, lapply(preds, function(x) x[[model_type]])))
-  names(all_preds) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR")
+  all_preds <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) do.call(rbind, lapply(preds, function(x) x[[model_type]])))
+  names(all_preds) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
   # return the MSE
   if (detail) {
     return(list(
