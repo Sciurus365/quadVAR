@@ -72,6 +72,7 @@ An \code{quadVAR} object that contains the following elements:
 \item \code{quadVAR}: A list of regularized nonlinear quadratic VAR models for each variable.
 \item \code{fullquadVAR}: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
 \item \code{data},\code{vars},\code{penalty},\code{tune},\code{SIS_options},\code{RAMP_options}: The input arguments.
+\item \code{data_x},\code{data_y}: The data directly used for modeling.
 }
 }
 \description{

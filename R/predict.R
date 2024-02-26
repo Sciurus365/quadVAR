@@ -48,7 +48,7 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
 
       if (!is.null(object$AR_model)) {
         lm_coef <- object$AR_model[[j]]$coef
-        data_y_out_all$AR[i, j] <- as.numeric(lm_coef[1] + lm_coef[2] * data_y[i, j]) %>% constrain(lowerbound[j], upperbound[j])
+        data_y_out_all$AR[i, j] <- as.numeric(lm_coef[1] + lm_coef[2] * data_x[i, j]) %>% constrain(lowerbound[j], upperbound[j])
       }
 
       data_y_out_all$NULL_model[i, j] <- mean(object$data_y[,j] %>% unlist() %>% mean, na.rm = TRUE) %>% constrain(lowerbound[j], upperbound[j])
