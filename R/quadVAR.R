@@ -70,8 +70,17 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   d <- ncol(data_x)
 
   # check if there are constant variables
-  if (any(apply(data_y, 2, function(x) length(unique(x)) == 1))) {
-    cli::cli_warn(c("There are constant variable(s) in the data. The constant variable(s) include {paste(vars[apply(data_y, 2, function(x) length(unique(x)) == 1)], collapse = ', ')}.", "i" = "Those variables may lead to errors in the estimation. Try removing those variables if errors are raised in the following steps."))
+  if (any(apply(data_x, 2, function(x) length(unique(x)) == 1) | apply(data_y, 2, function(x) length(unique(x)) == 1))) {
+    cli::cli_warn(c("There are constant variable(s) in the data. The constant variable(s) include {paste(vars[apply(data_y, 2, function(x) length(unique(x)) == 1)], collapse = ', ')}.", "i" = "Those variable(s) will be automatically excluded."))
+    vars <- vars[-which(apply(data_x, 2, function(x) length(unique(x)) == 1) | apply(data_y, 2, function(x) length(unique(x)) == 1))]
+
+    data_x <- data[index[[1]], vars]
+    data_y <- data[index[[2]], vars]
+    d <- ncol(data_x)
+  }
+
+  if (length(vars) <= 1) {
+    cli::cli_warn("There is only one variable in the data, which is {vars}. This may cause errors in the RAMP package when estimating the quadVAR model.")
   }
 
   # check if donotestimate only contains valid options
