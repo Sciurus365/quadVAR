@@ -279,7 +279,7 @@ summary.quadVAR <- function(object, ...) {
 #' @describeIn quadVAR Extract the coefficients from a quadVAR object.
 #' @export
 coef.quadVAR <- function(object, silent = FALSE, ...) {
-  n_var <- object$data %>% ncol()
+  n_var <- length(object$vars)
 
   output <- data.frame(
     model = rep(1:n_var, each = 2 * n_var + choose(n_var, 2)),
