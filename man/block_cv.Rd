@@ -11,7 +11,8 @@ block_cv(
   block = 10,
   lowerbound = -Inf,
   upperbound = Inf,
-  detail = FALSE
+  detail = FALSE,
+  metric = "MSE"
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ block_cv(
 \item{upperbound}{A numeric value or a vector with the same length as the number of variables that specifies  the upper bound of the predicted values. If the predicted value is greater than this value, it will be replaced by this value. The default value is Inf.}
 
 \item{detail}{A logical. If \code{TRUE}, the function will return the predictions for each model. The default is \code{FALSE}, which only returns the mean squared error for each model.}
+
+\item{metric}{A character vector. The metric to be used to evaluate the model. The default is "MSE", which calculates the mean squared error. The other option is "MAE", which calculates the mean absolute error. Only effective when \code{detail = FALSE}.}
 }
 \value{
 Depending on \code{detail}. If \code{FALSE}, it returns a list of mean squared errors for each model. If \code{TRUE}, it returns a list with the mean squared errors for each model, the true data, and the predictions for each model.

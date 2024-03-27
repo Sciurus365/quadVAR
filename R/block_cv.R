@@ -61,9 +61,10 @@ block_cv_split <- function(data, block = 10) {
 #' @param block An integer. The number of blocks to use in the cross-validation. The default is 10.
 #' @inheritParams predict.quadVAR
 #' @param detail A logical. If `TRUE`, the function will return the predictions for each model. The default is `FALSE`, which only returns the mean squared error for each model.
+#' @param metric A character vector. The metric to be used to evaluate the model. The default is "MSE", which calculates the mean squared error. The other option is "MAE", which calculates the mean absolute error. Only effective when `detail = FALSE`.
 #' @return Depending on `detail`. If `FALSE`, it returns a list of mean squared errors for each model. If `TRUE`, it returns a list with the mean squared errors for each model, the true data, and the predictions for each model.
 #' @export
-block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, upperbound = Inf, detail = FALSE) {
+block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, upperbound = Inf, detail = FALSE, metric = "MSE") {
   # split the data
   indices <- block_cv_split(data, block)
 
@@ -99,8 +100,11 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
   # calculate MSE
   # return(list(data[,fit$vars], do.call(rbind, preds)))
   mse <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean((as.matrix(data[, fit$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
+  # also calculate MAE
+  mae <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean(abs(as.matrix(data[, fit$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
 
   names(mse) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
+  names(mae) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
 
   all_preds <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) do.call(rbind, lapply(preds, function(x) x[[model_type]])))
   names(all_preds) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
@@ -108,10 +112,17 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
   if (detail) {
     return(list(
       mse = mse,
+      mae = mae,
       true_data = data[, fit$vars],
       all_preds = all_preds
     ))
   } else {
-    return(mse)
+    if(metric == "MSE") {
+      return(mse)
+    } else if(metric == "MAE") {
+      return(mae)
+    } else {
+      stop("Invalid metric")
+    }
   }
 }
