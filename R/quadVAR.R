@@ -153,7 +153,7 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   }
 
   return(structure(list(
-    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, data_x = data_x, data_y = data_y, vars = vars, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
+    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, data_x = data_x, data_y = data_y, vars = vars, dayvar = dayvar, beepvar = beepvar, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
   ), class = "quadVAR"))
 }
 
