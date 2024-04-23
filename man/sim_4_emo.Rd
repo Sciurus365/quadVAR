@@ -4,7 +4,7 @@
 \alias{sim_4_emo}
 \title{Simulate a 4-emotion model}
 \usage{
-sim_4_emo(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 0.2)
+sim_4_emo(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 1)
 }
 \arguments{
 \item{time}{The number of time steps to simulate.}
