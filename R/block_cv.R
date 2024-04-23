@@ -68,6 +68,9 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
   # split the data
   indices <- block_cv_split(data, block)
 
+  # create a list to store the fitted models
+  models <- vector("list", length = length(indices))
+
   # create a list to store the predictions
   preds <- vector("list", length = length(indices))
 
@@ -90,18 +93,16 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
 
 
     # fit the model on the training set
-    fit <- model(data[indices[[i]]$train, ])
+    models[[i]] <- model(data[indices[[i]]$train, ])
     # make predictions on the testing set
-    preds[[i]] <- stats::predict(fit, newdata = data[indices[[i]]$test, ], lowerbound = lowerbound, upperbound = upperbound)
+    preds[[i]] <- stats::predict(models[[i]], newdata = data[indices[[i]]$test, ], lowerbound = lowerbound, upperbound = upperbound)
   }
-
-  # return(preds)
 
   # calculate MSE
   # return(list(data[,fit$vars], do.call(rbind, preds)))
-  mse <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean((as.matrix(data[, fit$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
+  mse <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean((as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
   # also calculate MAE
-  mae <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean(abs(as.matrix(data[, fit$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
+  mae <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean(abs(as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
 
   names(mse) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
   names(mae) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
@@ -113,8 +114,9 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
     return(list(
       mse = mse,
       mae = mae,
-      true_data = data[, fit$vars],
-      all_preds = all_preds
+      true_data = data[, models[[1]]$vars],
+      all_preds = all_preds,
+      models = models
     ))
   } else {
     if(metric == "MSE") {
