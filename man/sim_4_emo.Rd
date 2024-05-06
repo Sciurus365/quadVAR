@@ -4,12 +4,12 @@
 \alias{sim_4_emo}
 \title{Simulate a 4-emotion model}
 \usage{
-sim_4_emo(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 1)
+sim_4_emo(time = 200, init = c(1.36, 1.36, 4.89, 4.89), sd = 1)
 }
 \arguments{
 \item{time}{The number of time steps to simulate.}
 
-\item{init}{A vector of initial values for the four variables.}
+\item{init}{A vector of initial values for the four variables. Default is c(1.36, 1.36, 4.89, 4.89), which is one of the stable states of the model.}
 
 \item{sd}{The standard deviation of the noise.}
 }

@@ -3,14 +3,14 @@
 #' This function simulates a 4-emotion model which is nonlinear, bistable, discrete, and (almost) centered to zero. Adapted from the model described by van de Leemput et al. (2014).
 #' @references van de Leemput, I. A., Wichers, M., Cramer, A. O., Borsboom, D., Tuerlinckx, F., Kuppens, P., ... & Scheffer, M. (2014). Critical slowing down as early warning for the onset and termination of depression. Proceedings of the National Academy of Sciences, 111(1), 87-92.
 #' @param time The number of time steps to simulate.
-#' @param init A vector of initial values for the four variables.
+#' @param init A vector of initial values for the four variables. Default is c(1.36, 1.36, 4.89, 4.89), which is one of the stable states of the model.
 #' @param sd The standard deviation of the noise.
 #'
 #' @return A matrix with the simulated data.
 #'
 #' @seealso [true_model_4_emo()], [compare_4_emo()], [quadVAR()]
 #' @export
-sim_4_emo <- function(time = 200, init = c(1.3, 1.3, 4.8, 4.8), sd = 1) {
+sim_4_emo <- function(time = 200, init = c(1.36, 1.36, 4.89, 4.89), sd = 1) {
   output <- matrix(nrow = time, ncol = 5)
   colnames(output) <- c("time", "x1", "x2", "x3", "x4")
   output[, 1] <- 1:time
