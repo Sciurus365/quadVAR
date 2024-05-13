@@ -45,7 +45,7 @@ Optional string indicating assessment beep per day. Adding this argument will ca
 
 \item{tune}{Tuning parameter selection method. Possible options include "AIC", "BIC", "EBIC", with "EBIC" as the default.}
 
-\item{donotestimate}{A character vector of the model names that are not estimated. Possible options include "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a \code{quadVAR} model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.}
+\item{donotestimate}{A character vector of the model names that are not estimated. Possible options include, "NULL_model", "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a \code{quadVAR} model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.}
 
 \item{SIS_options}{A list of other parameters for the \code{\link[SIS:tune.fit]{SIS::tune.fit()}} function. This is used for the regularized  VAR models.}
 
@@ -66,11 +66,12 @@ Optional string indicating assessment beep per day. Adding this argument will ca
 \value{
 An \code{quadVAR} object that contains the following elements:
 \itemize{
-\item \code{AR}: A list of linear AR models for each variable.
-\item \code{VAR}: A list of regularized VAR models for each variable.
-\item \code{fullVAR}: A list of unregularized (full) VAR models for each variable.
-\item \code{quadVAR}: A list of regularized nonlinear quadratic VAR models for each variable.
-\item \code{fullquadVAR}: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
+\item \code{NULL_model}: A list of NULL models for each variable.
+\item \code{AR_model}: A list of linear AR models for each variable.
+\item \code{VAR_model}: A list of regularized VAR models for each variable.
+\item \code{VAR_full_model}: A list of unregularized (full) VAR models for each variable.
+\item \code{quadVAR_model}: A list of regularized nonlinear quadratic VAR models for each variable.
+\item \code{quadVAR_full_model}: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
 \item \code{data},\code{vars},\code{penalty},\code{tune},\code{SIS_options},\code{RAMP_options}: The input arguments.
 \item \code{data_x},\code{data_y}: The data directly used for modeling.
 }

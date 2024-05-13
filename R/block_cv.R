@@ -100,15 +100,15 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
 
   # calculate MSE
   # return(list(data[,fit$vars], do.call(rbind, preds)))
-  mse <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean((as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
+  mse <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) mean((as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
   # also calculate MAE
-  mae <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) mean(abs(as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
+  mae <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) mean(abs(as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
 
-  names(mse) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
-  names(mae) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
+  names(mse) <- c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full")
+  names(mae) <- c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full")
 
-  all_preds <- lapply(c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model"), function(model_type) do.call(rbind, lapply(preds, function(x) x[[model_type]])))
-  names(all_preds) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
+  all_preds <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) do.call(rbind, lapply(preds, function(x) x[[model_type]])))
+  names(all_preds) <- c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full")
   # return the MSE
   if (detail) {
     return(list(

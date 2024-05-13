@@ -5,7 +5,7 @@
 #' @param data A `tibble`, data.frame, or matrix that represents a time series of vectors, with each row as a time step.
 #' @param vars A character vector of the variable names used in the model.
 #' @inheritParams mlVAR::mlVAR
-#' @param donotestimate A character vector of the model names that are not estimated. Possible options include "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a `quadVAR` model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.
+#' @param donotestimate A character vector of the model names that are not estimated. Possible options include, "NULL_model", "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a `quadVAR` model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.
 #' @param penalty The penalty used for the linear and regularized VAR models. Possible options include "LASSO", "SCAD", "MCP", with "LASSO" as the default.
 #' @param tune Tuning parameter selection method. Possible options include "AIC", "BIC", "EBIC", with "EBIC" as the default.
 #' @param SIS_options A list of other parameters for the [SIS::tune.fit()] function. This is used for the regularized  VAR models.
@@ -16,11 +16,12 @@
 #'
 #' @return An `quadVAR` object that contains the following elements:
 #' \itemize{
-#'  \item `AR`: A list of linear AR models for each variable.
-#'  \item `VAR`: A list of regularized VAR models for each variable.
-#'  \item `fullVAR`: A list of unregularized (full) VAR models for each variable.
-#'  \item `quadVAR`: A list of regularized nonlinear quadratic VAR models for each variable.
-#'  \item `fullquadVAR`: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
+#'  \item `NULL_model`: A list of NULL models for each variable.
+#'  \item `AR_model`: A list of linear AR models for each variable.
+#'  \item `VAR_model`: A list of regularized VAR models for each variable.
+#'  \item `VAR_full_model`: A list of unregularized (full) VAR models for each variable.
+#'  \item `quadVAR_model`: A list of regularized nonlinear quadratic VAR models for each variable.
+#'  \item `quadVAR_full_model`: A list of unregularized (full) nonlinear quadratic VAR models for each variable.
 #'  \item `data`,`vars`,`penalty`,`tune`,`SIS_options`,`RAMP_options`: The input arguments.
 #'  \item `data_x`,`data_y`: The data directly used for modeling.
 #'  }
@@ -91,6 +92,15 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
     }
   }
 
+  # NULL models
+  if (is.null(donotestimate) || !(("NULL_MODEL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
+    NULL_model <- lapply(vars, function(a_var) {
+      stats::lm(data_y %>% dplyr::pull(a_var) ~ 1)
+    })
+  } else {
+    NULL_model <- NULL
+  }
+
   # AR models
   if (is.null(donotestimate) || !(("AR" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
     AR_model <- lapply(vars, function(a_var) {
@@ -111,11 +121,11 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
 
   # full VAR models
   if (is.null(donotestimate) || !(("VAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
-    VAR_model_full <- lapply(vars, function(a_var) {
+    VAR_full_model <- lapply(vars, function(a_var) {
       stats::lm(data_y %>% dplyr::pull(a_var) ~ ., data = data_x)
     })
   } else {
-    VAR_model_full <- NULL
+    VAR_full_model <- NULL
   }
 
   # quadVAR models
@@ -145,15 +155,15 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
 
   # full quadVAR models
   if (is.null(donotestimate) || !(("QUADVAR_FULL" %in% toupper(donotestimate)) || ("ALL_OTHERS" %in% toupper(donotestimate)))) {
-    quadVAR_model_full <- lapply(vars, function(a_var) {
+    quadVAR_full_model <- lapply(vars, function(a_var) {
       stats::lm(stats::as.formula(paste("data_y %>% dplyr::pull(a_var) ~ ", paste("poly(", paste(colnames(data_x), collapse = ","), ", degree = 2, raw = TRUE)", sep = ""), collapse = " + ")), data = data_x)
     })
   } else {
-    quadVAR_model_full <- NULL
+    quadVAR_full_model <- NULL
   }
 
   return(structure(list(
-    AR_model = AR_model, VAR_model = VAR_model, VAR_model_full = VAR_model_full, quadVAR_model = quadVAR_model, quadVAR_model_full = quadVAR_model_full, data = data, data_x = data_x, data_y = data_y, vars = vars, dayvar = dayvar, beepvar = beepvar, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
+    NULL_model = NULL_model, AR_model = AR_model, VAR_model = VAR_model, VAR_full_model = VAR_full_model, quadVAR_model = quadVAR_model, quadVAR_full_model = quadVAR_full_model, data = data, data_x = data_x, data_y = data_y, vars = vars, dayvar = dayvar, beepvar = beepvar, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
   ), class = "quadVAR"))
 }
 
@@ -167,6 +177,11 @@ print.quadVAR <- function(x, ...) {
 #' @export
 summary.quadVAR <- function(object, ...) {
   if (object$tune == "BIC" | object$tune == "EBIC") {
+    NULL_IC <- object$NULL_model %>%
+      lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
+
     AR_IC <- object$AR_model %>%
       lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
       unlist() %>%
@@ -177,7 +192,7 @@ summary.quadVAR <- function(object, ...) {
       unlist() %>%
       sum()
 
-    VAR_full_IC <- object$VAR_model_full %>%
+    VAR_full_IC <- object$VAR_full_model %>%
       lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
       unlist() %>%
       sum()
@@ -190,11 +205,16 @@ summary.quadVAR <- function(object, ...) {
       unlist() %>%
       sum()
 
-    quadVAR_full_IC <- object$quadVAR_model_full %>%
+    quadVAR_full_IC <- object$quadVAR_full_model %>%
       lapply(function(x) stats::BIC(x) %>% as.numeric()) %>%
       unlist() %>%
       sum()
   } else if (object$tune == "AIC") {
+    NULL_IC <- object$NULL_model %>%
+      lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
+      unlist() %>%
+      sum()
+
     AR_IC <- object$AR_model %>%
       lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
       unlist() %>%
@@ -205,7 +225,7 @@ summary.quadVAR <- function(object, ...) {
       unlist() %>%
       sum()
 
-    VAR_full_IC <- object$VAR_model_full %>%
+    VAR_full_IC <- object$VAR_full_model %>%
       lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
       unlist() %>%
       sum()
@@ -218,12 +238,16 @@ summary.quadVAR <- function(object, ...) {
       unlist() %>%
       sum()
 
-    quadVAR_full_IC <- object$quadVAR_model_full %>%
+    quadVAR_full_IC <- object$quadVAR_full_model %>%
       lapply(function(x) stats::AIC(x) %>% as.numeric()) %>%
       unlist() %>%
       sum()
   }
 
+  NULL_df <- object$NULL_model %>%
+    lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
+    unlist() %>%
+    sum()
   AR_df <- object$AR_model %>%
     lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
     unlist() %>%
@@ -232,7 +256,7 @@ summary.quadVAR <- function(object, ...) {
     lapply(function(x) length(x$beta)) %>%
     unlist() %>%
     sum()
-  VAR_full_df <- object$VAR_model_full %>%
+  VAR_full_df <- object$VAR_full_model %>%
     lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
     unlist() %>%
     sum()
@@ -240,13 +264,14 @@ summary.quadVAR <- function(object, ...) {
     lapply(function(x) x$df[x$cri.loc]) %>%
     unlist() %>%
     sum()
-  quadVAR_full_df <- object$quadVAR_model_full %>%
+  quadVAR_full_df <- object$quadVAR_full_model %>%
     lapply(function(x) summary(x)$fstatistic["numdf"] %>% as.numeric()) %>%
     unlist() %>%
     sum()
 
   output <- tibble::tribble(
     ~`Model`, ~`Sumdf`, ~`SumIC`,
+    "NULL", NULL_df, NULL_IC,
     "AR", AR_df, AR_IC,
     "VAR", VAR_df, VAR_IC,
     "VAR_full", VAR_full_df, VAR_full_IC,
@@ -254,19 +279,22 @@ summary.quadVAR <- function(object, ...) {
     "quadVAR_full", quadVAR_full_df, quadVAR_full_IC
   )
 
+  if (is.null(object$NULL_model)) {
+    output <- output %>% dplyr::filter(`Model` != "NULL")
+  }
   if (is.null(object$AR_model)) {
     output <- output %>% dplyr::filter(`Model` != "AR")
   }
   if (is.null(object$VAR_model)) {
     output <- output %>% dplyr::filter(`Model` != "VAR")
   }
-  if (is.null(object$VAR_model_full)) {
+  if (is.null(object$VAR_full_model)) {
     output <- output %>% dplyr::filter(`Model` != "VAR_full")
   }
   if (is.null(object$quadVAR_model)) {
     output <- output %>% dplyr::filter(`Model` != "quadVAR")
   }
-  if (is.null(object$quadVAR_model_full)) {
+  if (is.null(object$quadVAR_full_model)) {
     output <- output %>% dplyr::filter(`Model` != "quadVAR_full")
   }
 

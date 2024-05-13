@@ -19,9 +19,9 @@ temp_mimic_quadVAR_AIC <- structure(
   list(
     AR_model = list(temp3),
     VAR_model = list(temp2_AIC),
-    VAR_model_full = list(temp3),
+    VAR_full_model = list(temp3),
     quadVAR_model = list(temp1_AIC),
-    quadVAR_model_full = list(temp3),
+    quadVAR_full_model = list(temp3),
     tune = "AIC"
   ),
   class = "quadVAR"
@@ -32,9 +32,9 @@ temp_mimic_quadVAR_BIC <- structure(
   list(
     AR_model = list(temp3),
     VAR_model = list(temp2_BIC),
-    VAR_model_full = list(temp3),
+    VAR_full_model = list(temp3),
     quadVAR_model = list(temp1_BIC),
-    quadVAR_model_full = list(temp3),
+    quadVAR_full_model = list(temp3),
     tune = "BIC"
   ),
   class = "quadVAR"
