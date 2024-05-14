@@ -271,7 +271,7 @@ summary.quadVAR <- function(object, ...) {
 
   output <- tibble::tribble(
     ~`Model`, ~`Sumdf`, ~`SumIC`,
-    "NULL", NULL_df, NULL_IC,
+    "NULL_model", NULL_df, NULL_IC,
     "AR", AR_df, AR_IC,
     "VAR", VAR_df, VAR_IC,
     "VAR_full", VAR_full_df, VAR_full_IC,
@@ -280,7 +280,7 @@ summary.quadVAR <- function(object, ...) {
   )
 
   if (is.null(object$NULL_model)) {
-    output <- output %>% dplyr::filter(`Model` != "NULL")
+    output <- output %>% dplyr::filter(`Model` != "NULL_model")
   }
   if (is.null(object$AR_model)) {
     output <- output %>% dplyr::filter(`Model` != "AR")
