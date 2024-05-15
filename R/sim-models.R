@@ -44,7 +44,8 @@ sim_4_emo <- function(time = 200, init = c(1.36, 1.36, 4.89, 4.89), sd = 1) {
 #' plot(true_model_4_emo(), interactive = TRUE)
 #' }
 true_model_4_emo <- function(...) {
-  return(structure(list(data = data.frame(x1 = c(-1, 0, 1), x2 = c(-1, 0, 1), x3 = c(-1, 0, 1), x4 = c(-1, 0, 1))), class = c("true_model_4_emo", "quadVAR")))
+  # Here we make a dataset with the means of 2.80, which is the neutral equilibrium point of the system, and sd of 1, so that in the illustrations, the standardized value would mean how far the value is from the equilibrium point.
+  return(structure(list(data = data.frame(x1 = c(-1, 0, 1), x2 = c(-1, 0, 1), x3 = c(-1, 0, 1), x4 = c(-1, 0, 1)) + 2.80, vars = c("x1", "x2", "x3", "x4")), class = c("true_model_4_emo", "quadVAR")))
 }
 
 #' @describeIn true_model_4_emo This function returns the coefficients for the 4-emotion model. It is also used in other functions to generate the linearized version of the true model and to make plots. It returns a list of coefficients for the 4-emotion model, in the same format as [coef.quadVAR()]
