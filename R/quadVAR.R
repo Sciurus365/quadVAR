@@ -10,9 +10,13 @@
 #' @param tune Tuning parameter selection method. Possible options include "AIC", "BIC", "EBIC", with "EBIC" as the default.
 #' @param SIS_options A list of other parameters for the [SIS::tune.fit()] function. This is used for the regularized  VAR models.
 #' @param RAMP_options A list of other parameters for the [RAMP::RAMP()] function. This is used for the nonlinear quadratic VAR model.
-#' @param object,x An `quadVAR` object.
-#' @param silent Whether to print out the results.
-#' @param ... Not in use.
+#' @param object,x An `quadVAR` object. (For `print.coef_quadVAR`, an `coef_quadVAR` object returned by [coef.quadVAR()].)
+#' @param use_actual_names Logical. If `TRUE`, the actual variable names are used in the output. If `FALSE`, the names "X1", "X2", etc., are used in the output. Default is `TRUE`.
+#' @param abbr Logical. If `TRUE`, the output is abbreviated. Default is `FALSE`.
+#' @param omit_zero Logical. If `TRUE`, the coefficients that are zero are omitted. Default is `FALSE`.
+#' @inheritParams base::abbreviate
+#' @inheritParams base::print.data.frame
+#' @param ... For `print.quadVAR`, additional arguments passed to [print.coef_quadVAR()]. For `print.coef_quadVAR`, additional arguments passed to [print.data.frame()].
 #'
 #' @return An `quadVAR` object that contains the following elements:
 #' \itemize{
@@ -167,10 +171,10 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   ), class = "quadVAR"))
 }
 
-#' @describeIn quadVAR Print the summary for a quadVAR object. See [summary.quadVAR()] for details. Note that this function does not automatically print all the coefficients. Use [coef.quadVAR()] to extract the coefficients.
+#' @describeIn quadVAR Print the coefficients for a quadVAR object. See [coef.quadVAR()] and [print.coef_quadVAR()] for details.
 #' @export
 print.quadVAR <- function(x, ...) {
-  print(summary.quadVAR(x, ...))
+  print(stats::coef(x), ...)
 }
 
 #' @describeIn quadVAR Summary of a quadVAR object. Different IC definitions used by different packages (which differ by a constant) are unified to make them comparable to each other.
@@ -306,7 +310,7 @@ summary.quadVAR <- function(object, ...) {
 
 #' @describeIn quadVAR Extract the coefficients from a quadVAR object.
 #' @export
-coef.quadVAR <- function(object, silent = FALSE, ...) {
+coef.quadVAR <- function(object, ...) {
   n_var <- length(object$vars)
 
   output <- data.frame(
@@ -324,12 +328,37 @@ coef.quadVAR <- function(object, silent = FALSE, ...) {
     }
   }
 
-  output_toprint <- output
-  output_toprint$estimate <- round(output_toprint$estimate, 2)
+  attr(output, "vars") <- object$vars
 
-  if (!silent) print(output_toprint)
+  # add the class "coef_quadVAR" to the output
+  class(output) <- c("coef_quadVAR", class(output))
 
-  invisible(output)
+  return(output)
+}
+
+#' @describeIn quadVAR Print the coefficients from a quadVAR object.
+#' @export
+print.coef_quadVAR <- function(x, use_actual_names = TRUE, abbr = FALSE, minlength = 3, omit_zero = TRUE, digits = 2, row.names = FALSE, ...) {
+  if (use_actual_names) {
+    name_to_use <- attr(x, "vars")
+    if (abbr) {
+      name_to_use <- abbreviate(name_to_use, minlength = minlength)
+    }
+    x$model <- name_to_use[x$model]
+
+    # x$effect may contain one or two terms, named as X1, X2, X1X2, etc. replace them with name_to_use[1], name_to_use[2], name_to_use[1] : name_to_use[2], etc.
+    x <- x %>%
+      dplyr::mutate(effect = stringr::str_replace(effect, "^X([0-9]+)$", "\\1"),
+                    effect = stringr::str_replace(effect, "^X([0-9]+)X([0-9]+)$", "\\1:\\2")) %>%
+      # replace all occurrence of numbers to the corresponding variable names
+      dplyr::mutate(effect = stringr::str_replace_all(effect, "[0-9]+", function(x) name_to_use[as.numeric(x)]))
+  }
+
+  if (omit_zero) {
+    x <- x %>% dplyr::filter(estimate != 0)
+  }
+
+  print.data.frame(x, digits = digits, row.names = row.names, ...)
 }
 
 generate_effect_term <- function(n_var) {

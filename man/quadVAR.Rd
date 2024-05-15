@@ -5,6 +5,7 @@
 \alias{print.quadVAR}
 \alias{summary.quadVAR}
 \alias{coef.quadVAR}
+\alias{print.coef_quadVAR}
 \alias{plot.quadVAR}
 \title{Estimate lag-1 quadratic vector autoregression models}
 \usage{
@@ -24,7 +25,18 @@ quadVAR(
 
 \method{summary}{quadVAR}(object, ...)
 
-\method{coef}{quadVAR}(object, silent = FALSE, ...)
+\method{coef}{quadVAR}(object, ...)
+
+\method{print}{coef_quadVAR}(
+  x,
+  use_actual_names = TRUE,
+  abbr = FALSE,
+  minlength = 3,
+  omit_zero = TRUE,
+  digits = 2,
+  row.names = FALSE,
+  ...
+)
 
 \method{plot}{quadVAR}(x, value = NULL, value_standardized = TRUE, interactive = FALSE, ...)
 }
@@ -51,11 +63,23 @@ Optional string indicating assessment beep per day. Adding this argument will ca
 
 \item{RAMP_options}{A list of other parameters for the \code{\link[RAMP:RAMP]{RAMP::RAMP()}} function. This is used for the nonlinear quadratic VAR model.}
 
-\item{...}{Not in use.}
+\item{...}{For \code{print.quadVAR}, additional arguments passed to \code{\link[=print.coef_quadVAR]{print.coef_quadVAR()}}. For \code{print.coef_quadVAR}, additional arguments passed to \code{\link[=print.data.frame]{print.data.frame()}}.}
 
-\item{object, x}{An \code{quadVAR} object.}
+\item{object, x}{An \code{quadVAR} object. (For \code{print.coef_quadVAR}, an \code{coef_quadVAR} object returned by \code{\link[=coef.quadVAR]{coef.quadVAR()}}.)}
 
-\item{silent}{Whether to print out the results.}
+\item{use_actual_names}{Logical. If \code{TRUE}, the actual variable names are used in the output. If \code{FALSE}, the names "X1", "X2", etc., are used in the output. Default is \code{TRUE}.}
+
+\item{abbr}{Logical. If \code{TRUE}, the output is abbreviated. Default is \code{FALSE}.}
+
+\item{minlength}{the minimum length of the abbreviations.}
+
+\item{omit_zero}{Logical. If \code{TRUE}, the coefficients that are zero are omitted. Default is \code{FALSE}.}
+
+\item{digits}{the minimum number of significant digits to be used: see
+    \code{\link[base]{print.default}}.}
+
+\item{row.names}{logical (or character vector), indicating whether (or
+    what) row names should be printed.}
 
 \item{value}{A numeric vector of length 1 or the same as the number of nodes, that specifies the values of the variables that the linearized model will be based on. If the length is 1, the same value will be used for all variables. The default value is \code{NULL}, in which case the value will be set to 0 in calculation, which means (if \code{value_standardized = TRUE}) the linearized model will be based on the mean values of all variables.}
 
@@ -81,13 +105,18 @@ This function estimate regularized nonlinear quadratic vector autoregression mod
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{print(quadVAR)}: Print the summary for a quadVAR object. See \code{\link[=summary.quadVAR]{summary.quadVAR()}} for details. Note that this function does not automatically print all the coefficients. Use \code{\link[=coef.quadVAR]{coef.quadVAR()}} to extract the coefficients.
+\item \code{print(quadVAR)}: Print the coefficients for a quadVAR object. See \code{\link[=coef.quadVAR]{coef.quadVAR()}} and \code{\link[=print.coef_quadVAR]{print.coef_quadVAR()}} for details.
 
 \item \code{summary(quadVAR)}: Summary of a quadVAR object. Different IC definitions used by different packages (which differ by a constant) are unified to make them comparable to each other.
 
 \item \code{coef(quadVAR)}: Extract the coefficients from a quadVAR object.
 
 \item \code{plot(quadVAR)}: Produce a plot for the linearized quadVAR model. Equivalent to first produce a linear quadVAR network using \code{\link[=linear_quadVAR_network]{linear_quadVAR_network()}}, then use \code{\link[=plot.linear_quadVAR_network]{plot.linear_quadVAR_network()}}.
+
+}}
+\section{Functions}{
+\itemize{
+\item \code{print(coef_quadVAR)}: Print the coefficients from a quadVAR object.
 
 }}
 \examples{

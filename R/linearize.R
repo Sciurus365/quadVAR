@@ -137,7 +137,7 @@ plot.linear_quadVAR_network <- function(x, interactive = FALSE, ...) {
 
     sliders <- vector("list", n_nodes)
     for (i in 1:n_nodes) {
-      sliders[[i]] <- shiny::sliderInput(paste0("slider_X", i), label = paste0("X", i), min = range_mins[i], max = range_maxs[i], value = var_means[i], step = steps[i])
+      sliders[[i]] <- shiny::sliderInput(paste0("slider_X", i), label = x$model$vars[i], min = range_mins[i], max = range_maxs[i], value = var_means[i], step = steps[i])
     }
     ui <- shiny::fluidPage(
       theme = shinythemes::shinytheme("simplex"),

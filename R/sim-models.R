@@ -51,11 +51,10 @@ true_model_4_emo <- function(...) {
 #' @describeIn true_model_4_emo This function returns the coefficients for the 4-emotion model. It is also used in other functions to generate the linearized version of the true model and to make plots. It returns a list of coefficients for the 4-emotion model, in the same format as [coef.quadVAR()]
 #'
 #' @param object A true_model_4_emo object.
-#' @inheritParams coef.quadVAR
 #' @param ... Not in use.
 #' @export
 #' @seealso [true_model_4_emo()], [compare_4_emo()], [quadVAR()]
-coef.true_model_4_emo <- function(object, silent = FALSE, ...) {
+coef.true_model_4_emo <- function(object, ...) {
   output <- data.frame(
     model = rep(1:4, each = 14),
     effect = rep(c("X1", "X2", "X3", "X4", "X1X1", "X1X2", "X1X3", "X1X4", "X2X2", "X2X3", "X2X4", "X3X3", "X3X4", "X4X4"), 4),
@@ -80,12 +79,7 @@ coef.true_model_4_emo <- function(object, silent = FALSE, ...) {
   }
   # print the output with the precision of 0.01
 
-  output_toprint <- output
-  output_toprint$estimate <- round(output_toprint$estimate, 2)
-
-  if (!silent) print(output_toprint)
-
-  invisible(output)
+  print(output)
 }
 
 #' @describeIn true_model_4_emo This function prints out the true model for the 4-emotion model in the same format as [RAMP::RAMP()], to help users to compare the true model and the estimated model.

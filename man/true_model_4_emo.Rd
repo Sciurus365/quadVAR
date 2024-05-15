@@ -8,7 +8,7 @@
 \usage{
 true_model_4_emo(...)
 
-\method{coef}{true_model_4_emo}(object, silent = FALSE, ...)
+\method{coef}{true_model_4_emo}(object, ...)
 
 \method{print}{true_model_4_emo}(x, which = NULL, ...)
 }
@@ -16,8 +16,6 @@ true_model_4_emo(...)
 \item{...}{Not in use.}
 
 \item{object}{A true_model_4_emo object.}
-
-\item{silent}{Whether to print out the results.}
 
 \item{x}{A true_model_4_emo object.}
 
