@@ -24,16 +24,16 @@ linear_quadVAR_network <- function(model, value = NULL, value_standardized = TRU
   }
 
   # check if the length of value is 1 or the same as the number of nodes, using rlang
-  if (length(value) != 1 && length(value) != ncol(model$data)) {
-    cli::cli_abort("The length of value must be 1 or the same as the number of variables. The length of value is {length(value)}, while the number of variables is {ncol(model$data)}.")
+  if (length(value) != 1 && length(value) != length(model$vars)) {
+    cli::cli_abort("The length of value must be 1 or the same as the number of variables. The length of value is {length(value)}, while the number of variables is {length(model$vars)}.")
   }
 
   if (length(value) == 1) {
-    value <- rep(value, ncol(model$data))
+    value <- rep(value, length(model$vars))
   }
 
-  data_mean <- colMeans(model$data)
-  data_sd <- apply(model$data, 2, stats::sd)
+  data_mean <- colMeans(model$data[, model$vars])
+  data_sd <- apply(model$data[, model$vars], 2, stats::sd)
 
   if (value_standardized) {
     standardized_value <- value
@@ -54,7 +54,7 @@ linear_quadVAR_network <- function(model, value = NULL, value_standardized = TRU
 #' @param value The `actual_value` in the output of [linear_quadVAR_network()].
 #' @return An adjacency matrix.
 get_adj_mat <- function(model, value) {
-  n_nodes <- ncol(model$data)
+  n_nodes <- length(model$vars)
   adj_mat <- matrix(0, nrow = n_nodes, ncol = n_nodes)
   model_summ <- stats::coef(model, silent = TRUE)
   model_eqs <- quadVAR_to_dyn_eqns(model, minus_self = FALSE)
@@ -72,7 +72,7 @@ get_adj_mat <- function(model, value) {
       attr("gradient")
   }
 
-  colnames(adj_mat) <- rownames(adj_mat) <- colnames(model$data)
+  colnames(adj_mat) <- rownames(adj_mat) <- model$vars
 
   return(adj_mat)
 }
@@ -84,7 +84,7 @@ get_adj_mat <- function(model, value) {
 #' @return A list of dynamic equations in characters. You can also use [rlang::parse_expr()] to parse them into expressions.
 #' @export
 quadVAR_to_dyn_eqns <- function(model, minus_self = TRUE) {
-  n_nodes <- ncol(model$data)
+  n_nodes <- length(model$vars)
   eqs <- vector("list", n_nodes)
   model_summary <- stats::coef(model, silent = TRUE)
 

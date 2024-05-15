@@ -119,9 +119,9 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
       models = models
     ))
   } else {
-    if(metric == "MSE") {
+    if (metric == "MSE") {
       return(mse)
-    } else if(metric == "MAE") {
+    } else if (metric == "MAE") {
       return(mae)
     } else {
       stop("Invalid metric")

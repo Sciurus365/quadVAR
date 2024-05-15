@@ -20,10 +20,10 @@ sim_4_emo <- function(time = 200, init = c(1.36, 1.36, 4.89, 4.89), sd = 1) {
     x2 <- output[i - 1, 3]
     x3 <- output[i - 1, 4]
     x4 <- output[i - 1, 5]
-    x1_1 <- 0.8 + 1.5*x1 - 0.1*x1^2 +0.02*x1*x2-0.1*x1*x3-0.1*x1*x4 + stats::rnorm(1, sd = sd)
-    x2_1 <- 0.8 + 1.5*x2 - 0.1*x2^2 +0.02*x1*x2-0.1*x2*x3-0.1*x2*x4 + stats::rnorm(1, sd = sd)
-    x3_1 <- 0.8 + 1.5*x3 - 0.1*x3^2 +0.02*x3*x4-0.1*x1*x3-0.1*x2*x3 + stats::rnorm(1, sd = sd)
-    x4_1 <- 0.8 + 1.5*x4 - 0.1*x4^2 +0.02*x3*x4-0.1*x1*x4-0.1*x2*x4 + stats::rnorm(1, sd = sd)
+    x1_1 <- 0.8 + 1.5 * x1 - 0.1 * x1^2 + 0.02 * x1 * x2 - 0.1 * x1 * x3 - 0.1 * x1 * x4 + stats::rnorm(1, sd = sd)
+    x2_1 <- 0.8 + 1.5 * x2 - 0.1 * x2^2 + 0.02 * x1 * x2 - 0.1 * x2 * x3 - 0.1 * x2 * x4 + stats::rnorm(1, sd = sd)
+    x3_1 <- 0.8 + 1.5 * x3 - 0.1 * x3^2 + 0.02 * x3 * x4 - 0.1 * x1 * x3 - 0.1 * x2 * x3 + stats::rnorm(1, sd = sd)
+    x4_1 <- 0.8 + 1.5 * x4 - 0.1 * x4^2 + 0.02 * x3 * x4 - 0.1 * x1 * x4 - 0.1 * x2 * x4 + stats::rnorm(1, sd = sd)
     output[i, 2:5] <- c(x1_1, x2_1, x3_1, x4_1)
   }
   return(output)
