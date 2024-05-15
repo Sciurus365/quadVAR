@@ -13,6 +13,7 @@ BugReports: https://github.com/Sciurus365/quadVAR/issues
 Imports: 
     cli,
     dplyr,
+    ggplot2,
     magrittr,
     ncvreg,
     qgraph,
