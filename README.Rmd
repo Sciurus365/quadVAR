@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/quadVAR)](https://CRAN.R-project.org/package=quadVAR)
+[![R-CMD-check](https://github.com/Sciurus365/quadVAR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Sciurus365/quadVAR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Estimate quadratic vector autoregression models with the
@@ -45,6 +46,6 @@ coef(qV1)
 plot(qV1)
 # Compare the estimation with the true model
 plot(true_model_4_emo())
-plot(qV1, value = 0, value_standardized = FALSE, layout = plot(true_model_4_emo())$layout)
+plot(qV1, value = rep(2.80, 4), value_standardized = FALSE, layout = plot(true_model_4_emo())$layout)
 ```
 

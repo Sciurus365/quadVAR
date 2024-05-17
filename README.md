@@ -7,6 +7,7 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/quadVAR)](https://CRAN.R-project.org/package=quadVAR)
+[![R-CMD-check](https://github.com/Sciurus365/quadVAR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Sciurus365/quadVAR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Estimate quadratic vector autoregression models with the strong
@@ -29,7 +30,7 @@ devtools::install_github("Sciurus365/quadVAR")
 library(quadVAR)
 set.seed(1614)
 data <- sim_4_emo(time = 200, sd = 1)
-plot(data[,"x1"])
+plot(data[, "x1"])
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
@@ -37,76 +38,51 @@ plot(data[,"x1"])
 ``` r
 qV1 <- quadVAR(data, vars = c("x1", "x2", "x3", "x4"))
 summary(qV1)
-#> # A tibble: 5 × 5
-#>   Model        Sumdf SumIC DiffIC   Weight
-#>   <chr>        <dbl> <dbl>  <dbl>    <dbl>
-#> 1 AR               4 2829.  369.  6.83e-81
-#> 2 VAR             16 2567.  107.  5.64e-24
-#> 3 VAR_full        16 2567.  107.  5.65e-24
-#> 4 quadVAR         27 2460.    0   1.00e+ 0
-#> 5 quadVAR_full    56 2526.   65.9 4.79e-15
+#> # A tibble: 6 × 5
+#>   Model        Sumdf SumIC DiffIC    Weight
+#>   <chr>        <dbl> <dbl>  <dbl>     <dbl>
+#> 1 NULL_model       0 3580. 1132.  1.96e-246
+#> 2 AR               4 2775.  326.  1.83e- 71
+#> 3 VAR             16 2544.   95.4 1.95e- 21
+#> 4 VAR_full        16 2544.   95.4 1.95e- 21
+#> 5 quadVAR         28 2449.    0   1.00e+  0
+#> 6 quadVAR_full    56 2519.   70.1 5.95e- 16
 coef(qV1)
-#>    model effect estimate
-#> 1      1     X1     0.35
-#> 2      1     X2     0.00
-#> 3      1     X3    -0.39
-#> 4      1     X4    -0.29
-#> 5      1   X1X1    -0.09
-#> 6      1   X1X2     0.00
-#> 7      1   X1X3    -0.09
-#> 8      1   X1X4    -0.10
-#> 9      1   X2X2     0.00
-#> 10     1   X2X3     0.00
-#> 11     1   X2X4     0.00
-#> 12     1   X3X3     0.00
-#> 13     1   X3X4     0.00
-#> 14     1   X4X4     0.02
-#> 15     2     X1     0.06
-#> 16     2     X2     0.32
-#> 17     2     X3    -0.38
-#> 18     2     X4    -0.30
-#> 19     2   X1X1     0.00
-#> 20     2   X1X2     0.00
-#> 21     2   X1X3    -0.05
-#> 22     2   X1X4     0.00
-#> 23     2   X2X2    -0.07
-#> 24     2   X2X3    -0.03
-#> 25     2   X2X4    -0.11
-#> 26     2   X3X3     0.00
-#> 27     2   X3X4     0.00
-#> 28     2   X4X4     0.00
-#> 29     3     X1    -0.40
-#> 30     3     X2    -0.34
-#> 31     3     X3     0.31
-#> 32     3     X4    -0.05
-#> 33     3   X1X1     0.00
-#> 34     3   X1X2     0.00
-#> 35     3   X1X3    -0.06
-#> 36     3   X1X4     0.00
-#> 37     3   X2X2     0.04
-#> 38     3   X2X3     0.00
-#> 39     3   X2X4    -0.02
-#> 40     3   X3X3     0.00
-#> 41     3   X3X4     0.00
-#> 42     3   X4X4     0.00
-#> 43     4     X1    -0.31
-#> 44     4     X2    -0.19
-#> 45     4     X3     0.00
-#> 46     4     X4     0.46
-#> 47     4   X1X1     0.00
-#> 48     4   X1X2     0.00
-#> 49     4   X1X3     0.00
-#> 50     4   X1X4    -0.16
-#> 51     4   X2X2     0.00
-#> 52     4   X2X3     0.00
-#> 53     4   X2X4     0.00
-#> 54     4   X3X3     0.00
-#> 55     4   X3X4     0.00
-#> 56     4   X4X4    -0.04
+#>  model effect estimate
+#>     x1     x1   1.6273
+#>     x1     x3   0.0329
+#>     x1     x4  -0.0751
+#>     x1  x1:x1  -0.1019
+#>     x1  x1:x3  -0.1177
+#>     x1  x1:x4  -0.1065
+#>     x1  x3:x3  -0.0104
+#>     x1  x4:x4   0.0157
+#>     x2     x1   0.2520
+#>     x2     x2   1.4055
+#>     x2     x3   0.4096
+#>     x2     x4   0.0446
+#>     x2  x1:x3  -0.0760
+#>     x2  x2:x2  -0.0863
+#>     x2  x2:x3  -0.0822
+#>     x2  x2:x4  -0.1158
+#>     x2  x3:x3  -0.0565
+#>     x3     x1  -0.1685
+#>     x3     x2   0.1035
+#>     x3     x3   1.6050
+#>     x3  x1:x3  -0.0769
+#>     x3  x2:x2   0.0018
+#>     x3  x2:x3  -0.1377
+#>     x3  x3:x3  -0.1004
+#>     x4     x1   0.0675
+#>     x4     x2  -0.1798
+#>     x4     x4   0.8196
+#>     x4  x1:x4  -0.1138
 plot(qV1)
 #> ℹ The quadVAR model, being nonlinear, generates a network meaningful only for
-#>   specific variable values. If values are unspecified, the plot defaults to the
-#>   mean, but this may not be meaningful in all cases.
+#>   specific variable values. If values are unspecified, the linearization/the
+#>   plot defaults to 0 (i.e., the mean values of all variables if
+#>   `value_standardized = TRUE`), but this is not a complete description of the
+#>   model estimation and may not be meaningful in all cases.
 #> This message is displayed once every 8 hours.
 ```
 
@@ -120,7 +96,7 @@ plot(true_model_4_emo())
 <img src="man/figures/README-example-3.png" width="100%" />
 
 ``` r
-plot(qV1, value = 0, value_standardized = FALSE, layout = plot(true_model_4_emo())$layout)
+plot(qV1, value = rep(2.80, 4), value_standardized = FALSE, layout = plot(true_model_4_emo())$layout)
 ```
 
 <img src="man/figures/README-example-4.png" width="100%" />

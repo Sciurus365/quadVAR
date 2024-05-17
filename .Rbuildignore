@@ -7,3 +7,8 @@
 ^.*\.RDS$
 ^.*\.csv$
 ^1\.Rmd$
+^cran-comments\.md$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

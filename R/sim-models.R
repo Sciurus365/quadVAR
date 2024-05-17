@@ -79,7 +79,7 @@ coef.true_model_4_emo <- function(object, ...) {
   }
   # print the output with the precision of 0.01
 
-  print(output)
+  output
 }
 
 #' @describeIn true_model_4_emo This function prints out the true model for the 4-emotion model in the same format as [RAMP::RAMP()], to help users to compare the true model and the estimated model.

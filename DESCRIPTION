@@ -8,7 +8,7 @@ Description: Estimate quadratic vector autoregression models with the
     strong hierarchy using the RAMP algorithm, compare the performance
     with linear models, and construct networks with partial derivatives.
 License: GPL (>= 3)
-URL: https://github.com/Sciurus365/quadVAR
+URL: https://github.com/Sciurus365/quadVAR, https://sciurus365.github.io/quadVAR/
 BugReports: https://github.com/Sciurus365/quadVAR/issues
 Imports: 
     cli,
