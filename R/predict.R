@@ -4,10 +4,11 @@
 #' @param donotpredict NOT IMPLEMENTED YET! A character vector of the model names that are not used for prediction. Possible options include "AR", "VAR", "VAR_full", "quadVAR_full", "all_others", with NULL as the default. If set "all_others", then only a `quadVAR` model will be estimated. For datasets with large number of variables, you may set this parameter to "quadVAR_full" to save time.
 #' @param lowerbound A numeric value or a vector with the same length as the number of variables that specifies the lower bound of the predicted values. If the predicted value is less than this value, it will be replaced by this value. The default value is -Inf.
 #' @param upperbound A numeric value or a vector with the same length as the number of variables that specifies  the upper bound of the predicted values. If the predicted value is greater than this value, it will be replaced by this value. The default value is Inf.
+#' @param with_const A logical value indicating whether to include the constant variables in the prediction. Those variables were automatically excluded in the estimation procedure. The default value is FALSE. When set to TRUE, the lowerbound and upperbound should be a vector with the same length as the number of variables in the model, including the constant variables. The values of the constant variables will be ignored though because their predicted values are always the same, which is the constant value in the input data.
 #' @param ... Other arguments passed to the [RAMP::predict.RAMP()] function.
 #' @return A data frame or tibble containing the predicted values of the dependent variables. If a value cannot be predicted (e.g., because the corresponding previous time point is not in the data), it will be NA.
 #' @export
-predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbound = -Inf, upperbound = Inf, ...) {
+predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbound = -Inf, upperbound = Inf, with_const = FALSE, ...) {
   if (is.null(newdata)) {
     newdata <- object$data
   }
@@ -20,6 +21,10 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
   # check lowerbound and upperbound
   if (length(lowerbound) == 1) lowerbound <- rep(lowerbound, length(object$vars))
   if (length(upperbound) == 1) upperbound <- rep(upperbound, length(object$vars))
+  if (with_const & !is.null(object$const_index)){
+    lowerbound <- lowerbound[-object$const_index]
+    upperbound <- upperbound[-object$const_index]
+  }
   if (length(lowerbound) != length(object$vars) | length(upperbound) != length(object$vars)) cli::cli_abort("The length of `lowerbound` and `upperbound` should be either 1 or the same as the number of variables in the model.")
 
   # remove data points according to the dayvar and beepvar
@@ -57,12 +62,29 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
 
   data_out <- apply(data[, object$vars], c(1, 2), function(x) NA)
 
+
+
   data_out_all <- rep(list(data_out), 6)
   names(data_out_all) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
   for (i in 1:6) {
     data_out_all[[i]][index[[2]], ] <- data_y_out_all[[i]]
   }
 
+  if (with_const) {
+    n_vars_total <- length(object$original_vars)
+    vars_index <- setdiff(1:n_vars_total, object$const_vars_index)
+    data_out_all_vars <- data_out_all
+    # add columns to data_out, column names are object$const_vars, those columns all have NAs
+    data_out <- matrix(NA, nrow = nrow(data), ncol = n_vars_total)
+    colnames(data_out) <- object$original_vars
+
+    data_out_all <- rep(list(data_out), 6)
+    names(data_out_all) <- c("VAR", "VAR_full", "quadVAR", "quadVAR_full", "AR", "NULL_model")
+    for (i in 1:6) {
+      data_out_all[[i]][index[[2]], vars_index] <- data_y_out_all[[i]]
+      data_out_all[[i]][index[[2]], object$const_vars_index] <- object$const_vars_value
+    }
+  }
   return(data_out_all)
 }
 

@@ -10,6 +10,7 @@
   donotpredict = NULL,
   lowerbound = -Inf,
   upperbound = Inf,
+  with_const = FALSE,
   ...
 )
 }
@@ -23,6 +24,8 @@
 \item{lowerbound}{A numeric value or a vector with the same length as the number of variables that specifies the lower bound of the predicted values. If the predicted value is less than this value, it will be replaced by this value. The default value is -Inf.}
 
 \item{upperbound}{A numeric value or a vector with the same length as the number of variables that specifies  the upper bound of the predicted values. If the predicted value is greater than this value, it will be replaced by this value. The default value is Inf.}
+
+\item{with_const}{A logical value indicating whether to include the constant variables in the prediction. Those variables were automatically excluded in the estimation procedure. The default value is FALSE. When set to TRUE, the lowerbound and upperbound should be a vector with the same length as the number of variables in the model, including the constant variables. The values of the constant variables will be ignored though because their predicted values are always the same, which is the constant value in the input data.}
 
 \item{...}{Other arguments passed to the \code{\link[RAMP:predict.RAMP]{RAMP::predict.RAMP()}} function.}
 }

@@ -77,11 +77,20 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   # check if there are constant variables
   if (any(apply(data_x, 2, function(x) length(unique(x)) == 1) | apply(data_y, 2, function(x) length(unique(x)) == 1))) {
     cli::cli_warn(c("There are constant variable(s) in the data. The constant variable(s) include {paste(vars[apply(data_y, 2, function(x) length(unique(x)) == 1)], collapse = ', ')}.", "i" = "Those variable(s) will be automatically excluded."))
-    vars <- vars[-which(apply(data_x, 2, function(x) length(unique(x)) == 1) | apply(data_y, 2, function(x) length(unique(x)) == 1))]
+    const_vars_index <- which(apply(data_x, 2, function(x) length(unique(x)) == 1) | apply(data_y, 2, function(x) length(unique(x)) == 1))
+    const_vars <- vars[const_vars_index]
+    const_vars_value <- data_x[1, const_vars] %>% unlist()
+    original_vars <- vars
+    vars <- vars[-const_vars_index]
 
     data_x <- data[index[[1]], vars]
     data_y <- data[index[[2]], vars]
     d <- ncol(data_x)
+  } else {
+    original_vars <- vars
+    const_vars <- NULL
+    const_vars_value <- NULL
+    const_vars_index <- NULL
   }
 
   if (length(vars) <= 1) {
@@ -167,7 +176,8 @@ quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO"
   }
 
   return(structure(list(
-    NULL_model = NULL_model, AR_model = AR_model, VAR_model = VAR_model, VAR_full_model = VAR_full_model, quadVAR_model = quadVAR_model, quadVAR_full_model = quadVAR_full_model, data = data, data_x = data_x, data_y = data_y, vars = vars, dayvar = dayvar, beepvar = beepvar, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
+    NULL_model = NULL_model, AR_model = AR_model, VAR_model = VAR_model, VAR_full_model = VAR_full_model, quadVAR_model = quadVAR_model, quadVAR_full_model = quadVAR_full_model, data = data, data_x = data_x, data_y = data_y, vars = vars, original_vars = original_vars, const_vars = const_vars, const_vars_index = const_vars_index, const_vars_value = const_vars_value,
+    dayvar = dayvar, beepvar = beepvar, penalty = penalty, tune = tune, SIS_options = SIS_options, RAMP_options = RAMP_options
   ), class = "quadVAR"))
 }
 

@@ -95,7 +95,7 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
     # fit the model on the training set
     models[[i]] <- model(data[indices[[i]]$train, ])
     # make predictions on the testing set
-    preds[[i]] <- stats::predict(models[[i]], newdata = data[indices[[i]]$test, ], lowerbound = lowerbound, upperbound = upperbound)
+    preds[[i]] <- stats::predict(models[[i]], newdata = data[indices[[i]]$test, ], lowerbound = lowerbound, upperbound = upperbound, with_const = TRUE)
   }
 
   # calculate MSE
