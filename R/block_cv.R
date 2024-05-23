@@ -100,9 +100,9 @@ block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, 
 
   # calculate MSE
   # return(list(data[,fit$vars], do.call(rbind, preds)))
-  mse <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) mean((as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
+  mse <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) mean((as.matrix(data[, models[[1]]$original_vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]])))^2, na.rm = TRUE))
   # also calculate MAE
-  mae <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) mean(abs(as.matrix(data[, models[[1]]$vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
+  mae <- lapply(c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full"), function(model_type) mean(abs(as.matrix(data[, models[[1]]$original_vars]) - do.call(rbind, lapply(preds, function(x) x[[model_type]]))), na.rm = TRUE))
 
   names(mse) <- c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full")
   names(mae) <- c("NULL_model", "AR", "VAR", "VAR_full", "quadVAR", "quadVAR_full")

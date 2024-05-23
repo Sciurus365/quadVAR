@@ -19,11 +19,11 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
   }
 
   # check lowerbound and upperbound
-  if (length(lowerbound) == 1) lowerbound <- rep(lowerbound, length(object$vars))
-  if (length(upperbound) == 1) upperbound <- rep(upperbound, length(object$vars))
-  if (with_const & !is.null(object$const_index)){
-    lowerbound <- lowerbound[-object$const_index]
-    upperbound <- upperbound[-object$const_index]
+  if (length(lowerbound) == 1) lowerbound <- rep(lowerbound, length(object$original_vars))
+  if (length(upperbound) == 1) upperbound <- rep(upperbound, length(object$original_vars))
+  if (with_const & !is.null(object$const_vars_index)){
+    lowerbound <- lowerbound[-object$const_vars_index]
+    upperbound <- upperbound[-object$const_vars_index]
   }
   if (length(lowerbound) != length(object$vars) | length(upperbound) != length(object$vars)) cli::cli_abort("The length of `lowerbound` and `upperbound` should be either 1 or the same as the number of variables in the model.")
 
@@ -89,7 +89,10 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
 }
 
 constrain <- function(x, lower, upper) {
-  if (x < lower) {
+  if (is.na(x)) {
+    cli::cli_alert("Missing values detected in the prediction. The missing values have been replaced by NA. Please carefully check the model estimation.")
+    return(NA)
+  } else if (x < lower) {
     return(lower)
   } else if (x > upper) {
     return(upper)
