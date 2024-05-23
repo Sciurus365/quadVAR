@@ -2,7 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.0.9
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-05-23T14:30Z
+last_built: 2024-05-23T16:58Z
 urls:
   reference: https://sciurus365.github.io/quadVAR/reference
   article: https://sciurus365.github.io/quadVAR/articles
