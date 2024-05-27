@@ -65,6 +65,11 @@ block_cv_split <- function(data, block = 10) {
 #' @return Depending on `detail`. If `FALSE`, it returns a list of mean squared errors for each model. If `TRUE`, it returns a list with the mean squared errors for each model, the true data, and the predictions for each model.
 #' @export
 block_cv <- function(data, dayvar = NULL, model, block = 10, lowerbound = -Inf, upperbound = Inf, detail = FALSE, metric = "MSE") {
+  if (any(is.na(data))) {
+    data <- stats::na.omit(data)
+    cli::cli_abort("Missing values detected in `data`. `block_cv()` cannot handle missing values at the moment.")
+  }
+
   # split the data
   indices <- block_cv_split(data, block)
 

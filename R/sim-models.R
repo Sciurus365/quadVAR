@@ -125,7 +125,7 @@ print.true_model_4_emo <- function(x, which = NULL, ...) {
 #' @param model The estimated model, using data simulated from [sim_4_emo()], and model estimated using [quadVAR()].
 #' @param silent Whether to print out the results.
 #'
-#' @return Silently return data frame with the estimated coefficients and the true coefficients for the main effects and interaction effects, while printing out the results rounded to two digits if \code{silent = FALSE}.
+#' @return Silently return data frame with the estimated coefficients and the true coefficients for the main effects and interaction effects, while printing out the results rounded to two digits if `silent = FALSE`.
 #' @export
 compare_4_emo <- function(model, silent = FALSE) {
   # first create a data frame with the correct format

@@ -45,11 +45,11 @@ predict.quadVAR <- function(object, newdata = NULL, donotpredict = NULL, lowerbo
     for (j in 1:ncol(data_y_out)) {
       if (!is.null(object$VAR_model)) data_y_out_all$VAR[i, j] <- stats::predict(object$VAR_model[[j]]$fit, X = as.matrix(data_x[c(i), ]), lambda = object$VAR_model[[j]]$lambda) %>% constrain(lowerbound[j], upperbound[j])
 
-      if (!is.null(object$VAR_model_full)) data_y_out_all$VAR_full[i, j] <- stats::predict(object$VAR_model_full[[j]], newdata = data_x[c(i), ]) %>% constrain(lowerbound[j], upperbound[j])
+      if (!is.null(object$VAR_full_model)) data_y_out_all$VAR_full[i, j] <- stats::predict(object$VAR_full_model[[j]], newdata = data_x[c(i), ]) %>% constrain(lowerbound[j], upperbound[j])
 
       if (!is.null(object$quadVAR_model)) data_y_out_all$quadVAR[i, j] <- stats::predict(object$quadVAR_model[[j]], newdata = as.matrix(data_x[c(i, i), ]))[1] %>% constrain(lowerbound[j], upperbound[j]) # It seems that the predict function in RAMP package does not support the argument `newdata` to be a matrix with a single row. So I duplicate the input data and only use the first output.
 
-      if (!is.null(object$quadVAR_model_full)) data_y_out_all$quadVAR_full[i, j] <- stats::predict(object$quadVAR_model_full[[j]], newdata = data_x[i, ]) %>% constrain(lowerbound[j], upperbound[j])
+      if (!is.null(object$quadVAR_full_model)) data_y_out_all$quadVAR_full[i, j] <- stats::predict(object$quadVAR_full_model[[j]], newdata = data_x[i, ]) %>% constrain(lowerbound[j], upperbound[j])
 
       if (!is.null(object$AR_model)) {
         lm_coef <- object$AR_model[[j]]$coef
