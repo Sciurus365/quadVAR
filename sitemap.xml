@@ -1,57 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/404.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/index.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/block_cv.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/compare_4_emo.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/find_index.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/get_adj_mat.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/linear_quadVAR_network.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/partial_plot.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/predict.quadVAR.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/quadVAR.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/quadVAR_to_dyn_eqns.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/sim_4_emo.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/true_model_4_emo.html</loc>
-  </url>
-  <url>
-    <loc>https://sciurus365.github.io/quadVAR/reference/tune.fit.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://sciurus365.github.io/quadVAR/404.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/LICENSE.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/authors.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/index.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/block_cv.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/compare_4_emo.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/find_index.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/get_adj_mat.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/index.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/linear_quadVAR_network.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/partial_plot.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/pipe.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/predict.quadVAR.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/quadVAR.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/quadVAR_to_dyn_eqns.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/sim_4_emo.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/true_model_4_emo.html</loc></url>
+<url><loc>https://sciurus365.github.io/quadVAR/reference/tune.fit.html</loc></url>
 </urlset>
+
