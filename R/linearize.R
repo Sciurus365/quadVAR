@@ -114,7 +114,7 @@ plot.linear_quadVAR_network <- function(x, interactive = FALSE, ...) {
   if (!interactive) {
     qgraph::qgraph(x$adj_mat, directed = TRUE, diag = TRUE, ...)
   } else {
-    n_nodes <- ncol(x$model$data)
+    n_nodes <- length(x$model$vars)
     original_qg <- plot(x, interactive = FALSE)
     original_layout <- original_qg$layout
 
