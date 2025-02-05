@@ -1,4 +1,4 @@
-#' Using the **glmnet** and **ncvreg** packages, fits a Generalized Linear Model or Cox Proportional Hazards Model using various methods for choosing the regularization parameter λ
+#' Using the **glmnet** and **ncvreg** packages, fits a Generalized Linear Model or Cox Proportional Hazards Model using various methods for choosing the regularization parameter \eqn{\lambda}
 #'
 #' This function is modified from [SIS::tune.fit()]. It is used to tune the regularization parameter for the regularized VAR models. This wrapper is used because of the following reasons.
 #' 1. The original [SIS::tune.fit()] function does not return the value of the information criteria that we would like to use.
@@ -9,7 +9,7 @@
 #'
 #' Original description from [SIS::tune.fit()]:
 #'
-#' This function fits a generalized linear model or a Cox proportional hazards model via penalized maximum likelihood, with available penalties as indicated in the **glmnet** and **ncvreg** packages. Instead of providing the whole regularization solution path, the function returns the solution at a unique value of λ, the one optimizing the criterion specified in tune.
+#' This function fits a generalized linear model or a Cox proportional hazards model via penalized maximum likelihood, with available penalties as indicated in the **glmnet** and **ncvreg** packages. Instead of providing the whole regularization solution path, the function returns the solution at a unique value of \eqn{\lambda}, the one optimizing the criterion specified in tune.
 #' @examples
 #' \dontrun{
 #' set.seed(0)

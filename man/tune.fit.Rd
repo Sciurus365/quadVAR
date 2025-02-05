@@ -2,7 +2,7 @@
 % Please edit documentation in R/SIS-tune.fit.R
 \name{tune.fit}
 \alias{tune.fit}
-\title{Using the \strong{glmnet} and \strong{ncvreg} packages, fits a Generalized Linear Model or Cox Proportional Hazards Model using various methods for choosing the regularization parameter λ}
+\title{Using the \strong{glmnet} and \strong{ncvreg} packages, fits a Generalized Linear Model or Cox Proportional Hazards Model using various methods for choosing the regularization parameter \eqn{\lambda}}
 \usage{
 tune.fit(
   x,
@@ -82,7 +82,7 @@ This function is modified from \code{\link[SIS:tune.fit]{SIS::tune.fit()}}. It i
 \details{
 Original description from \code{\link[SIS:tune.fit]{SIS::tune.fit()}}:
 
-This function fits a generalized linear model or a Cox proportional hazards model via penalized maximum likelihood, with available penalties as indicated in the \strong{glmnet} and \strong{ncvreg} packages. Instead of providing the whole regularization solution path, the function returns the solution at a unique value of λ, the one optimizing the criterion specified in tune.
+This function fits a generalized linear model or a Cox proportional hazards model via penalized maximum likelihood, with available penalties as indicated in the \strong{glmnet} and \strong{ncvreg} packages. Instead of providing the whole regularization solution path, the function returns the solution at a unique value of \eqn{\lambda}, the one optimizing the criterion specified in tune.
 }
 \examples{
 \dontrun{
