@@ -45,15 +45,17 @@
 #' @export
 #' @seealso [linear_quadVAR_network()]
 quadVAR <- function(data, vars, dayvar = NULL, beepvar = NULL, penalty = "LASSO", tune = "EBIC", donotestimate = NULL, SIS_options = list(), RAMP_options = list()) {
+
+  # This part is now changed to an onload check ---------
   # check if the package version of RAMP is at least 2.0.3.
   ## this is a temperary solution before the next official release of RAMP
-  if (!("RAMP" %in% utils::installed.packages())) {
-    cli::cli_abort("Please install the RAMP package from GitHub with the following command: `remotes::install_github('Sciurus365/RAMP')`.")
-  } else {
-    if (utils::packageVersion("RAMP") < "2.0.3") {
-      cli::cli_abort("Please update the RAMP package to at least version 2.0.3 with the following command: `remotes::install_github('Sciurus365/RAMP')`. This is a temporary solution before the next official release of RAMP.")
-    }
-  }
+  # if (!("RAMP" %in% utils::installed.packages())) {
+  #   cli::cli_abort("Please install the RAMP package from GitHub with the following command: `remotes::install_github('Sciurus365/RAMP')`.")
+  # } else {
+  #   if (utils::packageVersion("RAMP") < "2.0.3") {
+  #     cli::cli_abort("Please update the RAMP package to at least version 2.0.3 with the following command: `remotes::install_github('Sciurus365/RAMP')`. This is a temporary solution before the next official release of RAMP.")
+  #   }
+  # }
 
   # check arguments
   penalty <- toupper(penalty)
