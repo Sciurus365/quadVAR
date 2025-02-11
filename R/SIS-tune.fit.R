@@ -11,20 +11,20 @@
 #'
 #' This function fits a generalized linear model or a Cox proportional hazards model via penalized maximum likelihood, with available penalties as indicated in the **glmnet** and **ncvreg** packages. Instead of providing the whole regularization solution path, the function returns the solution at a unique value of \eqn{\lambda}, the one optimizing the criterion specified in tune.
 #' @examples
-#' \dontrun{
 #' set.seed(0)
 #' data("leukemia.train", package = "SIS")
 #' y.train <- leukemia.train[, dim(leukemia.train)[2]]
 #' x.train <- as.matrix(leukemia.train[, -dim(leukemia.train)[2]])
-#' x.train <- standardize(x.train)
+#' x.train <- SIS::standardize(x.train)
 #' model <- tune.fit(x.train[, 1:3500], y.train, family = "binomial", tune = "bic")
 #' model$ix
 #' model$a0
 #' model$beta
-#' }
+#'
 #'
 #' @inherit SIS::tune.fit
 #' @param ... additional arguments to be passed to the ncvreg::ncvreg() function.
+#' @export
 tune.fit <- function(x, y, family = "gaussian", penalty = c("SCAD", "MCP", "lasso"), concavity.parameter = switch(penalty,
                        SCAD = 3.7,
                        3

@@ -39,8 +39,10 @@ This function generate the true model for the 4-emotion model. It can used to co
 \examples{
 coef(true_model_4_emo())
 plot(true_model_4_emo())
-\dontrun{
-plot(true_model_4_emo(), interactive = TRUE)
+
+if (interactive()) {
+  # This code will only run in an interactive session
+  plot(true_model_4_emo(), interactive = TRUE)
 }
 }
 \seealso{

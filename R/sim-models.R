@@ -40,8 +40,10 @@ sim_4_emo <- function(time = 200, init = c(1.36, 1.36, 4.89, 4.89), sd = 1) {
 #' @examples
 #' coef(true_model_4_emo())
 #' plot(true_model_4_emo())
-#' \dontrun{
-#' plot(true_model_4_emo(), interactive = TRUE)
+#'
+#' if (interactive()) {
+#'   # This code will only run in an interactive session
+#'   plot(true_model_4_emo(), interactive = TRUE)
 #' }
 true_model_4_emo <- function(...) {
   # Here we make a dataset with the means of 2.80, which is the neutral equilibrium point of the system, and sd of 1, so that in the illustrations, the standardized value would mean how far the value is from the equilibrium point.

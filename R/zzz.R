@@ -9,7 +9,7 @@
       packageStartupMessage(
         paste0(
           "The installed version of RAMP (v", installed_version,
-          ") has a known bug affecting model selection. For example, when using which.min() \n",
+          ") has a known bug affecting model selection. \n",
           "To fix this issue, please update to the patched version by running:\n",
           "  remotes::install_github('Sciurus365/RAMP')"
         )

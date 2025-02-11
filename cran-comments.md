@@ -1,4 +1,9 @@
-* This is the first submission of a new package.
+* This is the first CRAN submission of a new package.
+
+* This is a re-submission, in which:
+  * The abbreviation RAMP in the DESCRIPTION was explained and its reference was added.
+  * The `tune.fit()` function was exported.
+  * The unnecessary `\dontrun` in the examples was removed or changed to `\donttest`.
 
 ## R CMD check results
 
